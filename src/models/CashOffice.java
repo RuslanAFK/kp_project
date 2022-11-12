@@ -3,6 +3,7 @@ package models;
 import java.util.Optional;
 
 public class CashOffice {
+    private int id;
     private Position position;
     private boolean disabled = false;
     public CashOffice(Position position, boolean disabled) {

@@ -17,4 +17,8 @@ public class Client {
         this.ticketCount = ticketCount;
         this.uniqueId = uniqueId;
     }
+
+    public int getId() {
+        return uniqueId;
+    }
 }
