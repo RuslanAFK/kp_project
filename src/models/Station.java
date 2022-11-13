@@ -8,7 +8,7 @@ public class Station {
     private List<CashOffice> offices;
     private ArrayList<Client> clients;
     private ArrayList<LoggingItem> loggingTable;
-    private ArrayList<Position> entrances;
+    private ArrayList<Position> entrances2;
     private int entranceCount;
     private int timePerTicket; // in ms
     private int width = 0; // in px
