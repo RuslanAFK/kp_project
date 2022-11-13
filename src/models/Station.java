@@ -6,22 +6,29 @@ import java.util.List;
 
 public class Station {
     private List<CashOffice> offices;
+    private ArrayList<Client> clients;
+    private ArrayList<LoggingItem> loggingTable;
+    private ArrayList<Position> entrances;
     private int entranceCount;
     private int timePerTicket; // in ms
-    private int maxClients = 10;
+    private int width = 0; // in px
+    private int height = 0;
+    public Station(ArrayList<CashOffice> offices, int entranceCount, int timePerTicket) {
+        this.clients = new ArrayList<>();
+        this.offices = new ArrayList<>();
+        this.offices.addAll(offices);
+        this.entranceCount = entranceCount;
+        this.timePerTicket = timePerTicket;
+    }
 
     public Station(){
         this.offices = new ArrayList<CashOffice>();
         entranceCount = 1;
         timePerTicket = 1000;
     }
-
-    public Station(ArrayList<CashOffice> offices, int entranceCount, int timePerTicket) {
-        this.offices = new ArrayList<CashOffice>(offices);
-        this.entranceCount = entranceCount;
-        this.timePerTicket = timePerTicket;
+    public ArrayList<Client> getClients() {
+        return clients;
     }
-
     public void addCashOffice(CashOffice office){
         offices.add(office);
     }
