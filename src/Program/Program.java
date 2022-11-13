@@ -1,7 +1,12 @@
+package Program;
+
 import models.Station;
 import ui.Canvas2;
 import ui.StartForm;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
 
@@ -36,6 +41,22 @@ public class Program {
         startForm.start();
     }
     public void start(int strategy){
+        Canvas2 canvas = new Canvas2(station);
+        canvas.start();
         System.out.println("Strategy: " + strategy);
+    }
+
+    //EXAMPLE
+    public void someAlgorithm(){
+        //EXAMPLE OF TIMER
+        Timer timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //ACTION REPEATS EVERY 1000ms
+            }
+        });
+        timer.setRepeats(true); //repeat or do it once after delay
+        timer.start();
+        timer.stop();
     }
 }

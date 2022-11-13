@@ -1,5 +1,6 @@
 package ui;
 
+import Program.Program;
 import models.Station;
 
 import javax.swing.*;
@@ -28,15 +29,16 @@ public class StartForm {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                try {
+                Program pr = Program.getInstance();
+                pr.start(strategy);
+                /*try {
                     Canvas2 canvas = new Canvas2(station);
                     canvas.start();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
-                }
+                }*/
             }
         });
         addStationButton.addActionListener(new ActionListener() {

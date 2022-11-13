@@ -22,19 +22,30 @@ public class Canvas2 extends JPanel{
     Image clientImg;//50 x 25
 
     Station station;
-    public Canvas2(Station station) throws IOException {
+    public Canvas2(Station station) {
         this.station = station;
         System.out.println("Const");
-        cashImg = ImageIO.read(new File("src/sprites/cashier.png"));
-        clientImg = ImageIO.read(new File("src/sprites/client.png"));
-
+        try{
+            cashImg = ImageIO.read(new File("src/sprites/cashier.png"));
+            clientImg = ImageIO.read(new File("src/sprites/client.png"));
+        }catch (IOException e) {
+            System.out.println("Cash and client img set failed");
+            throw new RuntimeException(e);
+        }
     }
 
-    public void start() throws InterruptedException {
+    public void start() {
         System.out.println("Start");
         JFrame frame = new JFrame("Cash Emulator");
-        Image icon = Toolkit.getDefaultToolkit().getImage("src/sprites/icon.png");
-        frame.setIconImage(icon);
+        try{
+            Image icon = Toolkit.getDefaultToolkit().getImage("src/sprites/icon.png");
+            frame.setIconImage(icon);
+        }catch (Exception e) {
+            System.out.println("Icon set failed");
+            //throw new RuntimeException(e);
+        }
+
+
         frame.add(this);
         frame.setSize(width,height);
         frame.setResizable(false);
@@ -45,11 +56,11 @@ public class Canvas2 extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 //System.out.println("Hello");
-                station.addCashOffice(new CashOffice(new Position(700, 500)));
+
                 repaint(0,0,width,height);
             }
         });
-        timer.setRepeats(false);
+        timer.setRepeats(true);
         timer.start();
 
     }
