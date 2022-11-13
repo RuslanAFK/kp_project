@@ -38,7 +38,7 @@ public class CashInput {
 
     public void start() {
         frame = new JFrame("Add new Cash Office");
-        Image icon = Toolkit.getDefaultToolkit().getImage("kp_project-Models/src/sprites/icon.png");
+        Image icon = Toolkit.getDefaultToolkit().getImage("src/sprites/icon.png");
         frame.setIconImage(icon);
         frame.setContentPane(this.inputPanel);
         frame.setResizable(false);

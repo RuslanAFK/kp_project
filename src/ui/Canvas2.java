@@ -15,18 +15,18 @@ public class Canvas2 extends JPanel{
 
     BufferedImage surface;
     final int width = 800;
-    final int height = 600;
+    final int height = 640;//window nav is 40px
     Graphics g;
 
-    Image cash; //50 x 50
-    Image client;//50 x 25
+    Image cashImg; //50 x 50
+    Image clientImg;//50 x 25
 
     Station station;
     public Canvas2(Station station) throws IOException {
         this.station = station;
         System.out.println("Const");
-        cash = ImageIO.read(new File("src/sprites/cashier.png"));
-        client = ImageIO.read(new File("src/sprites/client.png"));
+        cashImg = ImageIO.read(new File("src/sprites/cashier.png"));
+        clientImg = ImageIO.read(new File("src/sprites/client.png"));
 
     }
 
@@ -39,11 +39,12 @@ public class Canvas2 extends JPanel{
         frame.setSize(width,height);
         frame.setResizable(false);
         frame.setVisible(true);
+        frame.setLocationRelativeTo(null);
 
         Timer timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Hello");
+                //System.out.println("Hello");
                 station.addCashOffice(new CashOffice(new Position(700, 500)));
                 repaint(0,0,width,height);
             }
@@ -51,14 +52,26 @@ public class Canvas2 extends JPanel{
         timer.setRepeats(false);
         timer.start();
 
-
     }
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
+
         for (var office:  station.getCashOffices()) {
-            g.drawImage(cash, office.getPosition().x, office.getPosition().y, null);
+            g.drawImage(cashImg, office.getPosition().x, office.getPosition().y, null);
         }
+
+        for (int i = 0; i < station.getEntranceCount(); i++){
+            Position tempPos = station.getEntrancePosition(i);
+            g.setColor(Color.DARK_GRAY);
+            g.fillRect(tempPos.x, tempPos.y, 50, 10);
+            //g.drawRect(tempPos.x, tempPos.y, 50, 20);
+        }
+
+        for (var client:  station.getClients()) {
+            g.drawImage(clientImg, client.getPosition().x, client.getPosition().y, null);
+        }
+
     }
 
 

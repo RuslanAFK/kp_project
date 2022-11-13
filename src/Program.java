@@ -1,22 +1,41 @@
-import models.Client;
+import models.Station;
+import ui.Canvas2;
+import ui.StartForm;
 
-import java.util.ArrayList;
+import java.io.IOException;
+
 
 public class Program {
-    private ArrayList<Client> clients;
 
-    private int maxClients = 10;
-    private boolean canClientsGoIn = true;
-    public boolean addClient() {
-        if(clients.size() == maxClients) {
-            return canClientsGoIn = false;
+    private static Program _instance;
+    private StartForm startForm;
+    private int clientGenerateTime;
+    private Canvas2 canvas;
+    private Station station;
+
+
+    private Program(){
+        clientGenerateTime = 1000;
+        station = new Station();
+    }
+
+    public static Program getInstance() {
+        if (_instance == null) {
+            _instance = new Program();
         }
-        else if(!canClientsGoIn && clients.size() > 0.7*maxClients) {
-            return false;
-        }
-        canClientsGoIn = true;
-        //var client = new Client();
-        //clients.add(client);
-        return true;
+        return _instance;
+    }
+
+    public static void main(String[] args) throws IOException {
+        Program a = Program.getInstance();
+        a.configure();
+    }
+    public void configure(){
+
+        startForm = new StartForm(station);
+        startForm.start();
+    }
+    public void start(int strategy){
+        System.out.println("Strategy: " + strategy);
     }
 }

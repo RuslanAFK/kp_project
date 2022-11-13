@@ -6,29 +6,49 @@ import java.util.List;
 
 public class Station {
     private List<CashOffice> offices;
-    private ArrayList<Client> clients;
-    private ArrayList<LoggingItem> loggingTable;
-    private ArrayList<Position> entrances;
-    private int entranceCount;
+    private List<Position> entrances;
+    private List<Client> clients;
     private int timePerTicket; // in ms
-    private int width = 0; // in px
-    private int height = 0;
-    public Station(ArrayList<CashOffice> offices, int entranceCount, int timePerTicket) {
-        this.clients = new ArrayList<>();
-        this.offices = new ArrayList<>();
-        this.offices.addAll(offices);
-        this.entranceCount = entranceCount;
-        this.timePerTicket = timePerTicket;
-    }
+    private int maxClients = 10;
 
     public Station(){
         this.offices = new ArrayList<CashOffice>();
-        entranceCount = 1;
+        entrances = new ArrayList<Position>();
+        entrances.add(new Position(400-25, 591));
+        clients = new ArrayList<Client>();
+        clients.add(new Client(1, 1, new Position(100,100), Status.NONE));
         timePerTicket = 1000;
     }
-    public ArrayList<Client> getClients() {
-        return clients;
+
+
+    public void addClient(Client client){
+        clients.add(client);
     }
+    public List<Client> getClients(){
+        return Collections.unmodifiableList(clients);
+    }
+
+    public void setEntranceCount(int count){
+        if(entrances.size() != count) {
+            entrances.clear();
+            int space = 800/(count+1);
+            for (int i = 1; i <= count; i++){
+                entrances.add(new Position(space*i-25, 591));
+            }
+        }
+    }
+    public Position getEntrancePosition(int index){
+        return entrances.get(index);
+    }
+    public int getEntranceCount(){
+        return entrances.size();
+    }
+
+    public Station(ArrayList<CashOffice> offices, int entranceCount, int timePerTicket) {
+        this.offices = new ArrayList<CashOffice>(offices);
+        this.timePerTicket = timePerTicket;
+    }
+
     public void addCashOffice(CashOffice office){
         offices.add(office);
     }
@@ -36,15 +56,9 @@ public class Station {
         return Collections.unmodifiableList(offices);
     }
 
-    public void setEntranceCount(int entranceCount) {
-        this.entranceCount = entranceCount;
-    }
 
     public void setTimePerTicket(int timePerTicket) {
         this.timePerTicket = timePerTicket;
-    }
-    public int getEntranceCount(){
-        return entranceCount;
     }
     public int getTimePerTicket(){
         return timePerTicket;

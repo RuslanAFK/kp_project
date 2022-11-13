@@ -23,8 +23,8 @@ public class Canvas {
 
     public Canvas() throws IOException {
         System.out.println("Const");
-        cash = ImageIO.read(new File("kp_project-Models/src/sprites/cashier.png"));
-        client = ImageIO.read(new File("kp_project-Models/src/sprites/client.png"));
+        cash = ImageIO.read(new File("src/sprites/cashier.png"));
+        client = ImageIO.read(new File("src/sprites/client.png"));
         surface = new BufferedImage(width,height, BufferedImage.TYPE_INT_RGB);
         view = new JLabel(new ImageIcon(surface));
         Graphics g = surface.getGraphics();
@@ -36,7 +36,7 @@ public class Canvas {
     public void start() throws InterruptedException {
         System.out.println("Start");
         JFrame frame = new JFrame("Cash Emulator");
-        Image icon = Toolkit.getDefaultToolkit().getImage("kp_project-Models/src/sprites/icon.png");
+        Image icon = Toolkit.getDefaultToolkit().getImage("src/sprites/icon.png");
         frame.setIconImage(icon);
 
 
