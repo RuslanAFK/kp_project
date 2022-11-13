@@ -6,6 +6,7 @@ public class Station {
     private ArrayList<CashOffice> offices;
     private ArrayList<Client> clients;
     private ArrayList<LoggingItem> loggingTable;
+    private ArrayList<Position> entrances;
     private int entranceCount;
     private int timePerTicket; // in ms
     private int maxClients = 10;
