@@ -1,38 +1,45 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Station {
-    private ArrayList<CashOffice> offices;
-    private ArrayList<Client> clients;
-    private ArrayList<LoggingItem> loggingTable;
-    private ArrayList<Position> entrances;
+    private List<CashOffice> offices;
     private int entranceCount;
     private int timePerTicket; // in ms
     private int maxClients = 10;
-    private boolean canClientsGoIn = true;
-    private int width = 0; // in px
-    private int height = 0;
+
+    public Station(){
+        this.offices = new ArrayList<CashOffice>();
+        entranceCount = 1;
+        timePerTicket = 1000;
+    }
+
     public Station(ArrayList<CashOffice> offices, int entranceCount, int timePerTicket) {
-        this.clients = new ArrayList<>();
-        this.offices = new ArrayList<>();
-        this.offices.addAll(offices);
+        this.offices = new ArrayList<CashOffice>(offices);
         this.entranceCount = entranceCount;
         this.timePerTicket = timePerTicket;
     }
-    public boolean addClient() {
-        if(clients.size() == maxClients) {
-            return canClientsGoIn = false;
-        }
-        else if(!canClientsGoIn && clients.size() > 0.7*maxClients) {
-            return false;
-        }
-        canClientsGoIn = true;
-        //var client = new Client();
-        //clients.add(client);
-        return true;
+
+    public void addCashOffice(CashOffice office){
+        offices.add(office);
     }
-    public ArrayList<Client> getClients() {
-        return clients;
+    public List<CashOffice> getCashOffices(){
+        return Collections.unmodifiableList(offices);
+    }
+
+    public void setEntranceCount(int entranceCount) {
+        this.entranceCount = entranceCount;
+    }
+
+    public void setTimePerTicket(int timePerTicket) {
+        this.timePerTicket = timePerTicket;
+    }
+    public int getEntranceCount(){
+        return entranceCount;
+    }
+    public int getTimePerTicket(){
+        return timePerTicket;
     }
 }
