@@ -22,6 +22,10 @@ public class StartForm {
     private Station station;
     private int strategy;
 
+    //форма яка збирає дані для запуску
+    //має метод старт який запускає її
+    //в конструкторі є ActionListener які записують інфу в обєкт станції переданий з Program
+    //при закриванні цього вікна закривається програма
     public StartForm(Station st) {
         this.station = st;
         strategy = 1000;
@@ -31,14 +35,7 @@ public class StartForm {
             public void actionPerformed(ActionEvent e) {
                 Program pr = Program.getInstance();
                 pr.start(strategy);
-                /*try {
-                    Canvas2 canvas = new Canvas2(station);
-                    canvas.start();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }*/
+
             }
         });
         addStationButton.addActionListener(new ActionListener() {
@@ -81,6 +78,7 @@ public class StartForm {
             }
         });
     }
+
     public void start() {
         JFrame frame = new JFrame("Configure System");
         Image icon = Toolkit.getDefaultToolkit().getImage("src/sprites/icon.png");
@@ -102,7 +100,7 @@ public class StartForm {
         entranceSpinner.setMinimumSize(new Dimension(100, 25));
         ticketSpinner = new JSpinner(new SpinnerNumberModel(1000, 100, 5000, 1));
         ticketSpinner.setMinimumSize(new Dimension(100, 25));
-        strategySpinner = new JSpinner(new SpinnerNumberModel(1000, 1000, 5000, 1));
+        strategySpinner = new JSpinner(new SpinnerNumberModel(1000, 100, 5000, 1));
         strategySpinner.setMinimumSize(new Dimension(100, 25));
     }
 }

@@ -1,33 +1,80 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
+//станція яка має список всіх кас, всіх клієнтів, позиції входів і ше якісь параметри незначні
+//внизу розпишу по методах конкретно
 public class Station {
     private List<CashOffice> offices;
     private List<Position> entrances;
     private List<Client> clients;
-    private int timePerTicket; // in ms
-    private int maxClients = 10;
-
+    private List<LoggingItem> loggingTable;
+    private int timePerTicket = 1000; // in ms
     public Station(){
-        this.offices = new ArrayList<CashOffice>();
-        entrances = new ArrayList<Position>();
+        this.offices = new ArrayList<>();
+        entrances = new ArrayList<>();
         entrances.add(new Position(400-25, 591));
-        clients = new ArrayList<Client>();
-        clients.add(new Client(1, 1, new Position(100,100), Status.NONE));
-        timePerTicket = 1000;
+        clients = new ArrayList<>();
+        loggingTable = new ArrayList<>();
     }
 
-
-    public void addClient(Client client){
-        clients.add(client);
-    }
-    public List<Client> getClients(){
-        return Collections.unmodifiableList(clients);
+    public List<LoggingItem> getLoggingTable() {
+        return loggingTable;
     }
 
+    //починає процес продавання квитків який контролюється таймером
+    //викликається з класу Program при початку емуляції програми
+    //викликає initialiseTimer();
+    public void startSellingTickets(){
+        System.out.println("Starting selling tickets, time: " + timePerTicket);
+        initialiseTimer();
+    }
+
+    public int generateTicketCount(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
+    }
+
+    //починає таймер який раз в певний проміжок часу продає квиток(на кожній касі)
+    //видаляє клієнта зі станці якому вже продано квиток
+    private void initialiseTimer(){
+        int ticketCount = generateTicketCount(1, 5);
+        Timer timer2 = new Timer();
+        timer2.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                for (CashOffice office : offices) {
+                    if(!office.isDisabled()){
+                        Client client = office.sellTicket();
+
+                        if(client != null) {
+                            clients.remove(client);
+
+                            // create log in logging table
+                            for(var item: loggingTable) {
+                                if(item.getClientId() == client.getUniqueId()) {
+                                    item.setTicketCount(ticketCount);
+                                    item.setEndTime();
+                                    logTable();
+                                }
+                            }
+                            // restart with different random ticket count
+                            timer2.cancel();
+                            initialiseTimer();
+                            System.out.println("\nClient removed: " + client.getPosition().toString());
+                        }
+                    }
+                }
+            }
+        }, 0, (long) timePerTicket * ticketCount);
+
+    }
+
+    //задаю кількість входів а метод сам рахує їхнє місцеположення тіпа як justify-content: space-around;
     public void setEntranceCount(int count){
         if(entrances.size() != count) {
             entrances.clear();
@@ -37,16 +84,26 @@ public class Station {
             }
         }
     }
+
+    //Далі нема шо читати
+
+    public int getCashOfficeIndex(CashOffice cashOffice){
+        return offices.indexOf(cashOffice);
+    }
+
+    public void addClient(Client client){
+        clients.add(client);
+    }
+    public List<Client> getClients(){
+        return Collections.unmodifiableList(clients);
+    }
+
+
     public Position getEntrancePosition(int index){
         return entrances.get(index);
     }
     public int getEntranceCount(){
         return entrances.size();
-    }
-
-    public Station(ArrayList<CashOffice> offices, int entranceCount, int timePerTicket) {
-        this.offices = new ArrayList<CashOffice>(offices);
-        this.timePerTicket = timePerTicket;
     }
 
     public void addCashOffice(CashOffice office){
@@ -56,11 +113,25 @@ public class Station {
         return Collections.unmodifiableList(offices);
     }
 
-
     public void setTimePerTicket(int timePerTicket) {
         this.timePerTicket = timePerTicket;
     }
     public int getTimePerTicket(){
         return timePerTicket;
+    }
+    public void logTable() {
+        try {
+            FileWriter myWriter = new FileWriter("logging_table.txt", false);
+            myWriter.write("Client Id\tCash Id\tStart Time\tEnd Time\tTicket Count\r\n");
+            for(var item: loggingTable) {
+                myWriter.write(item.getClientId() + "\t" + item.getOfficeId() + "\t" + item.getStartTime() +
+                        "\t" + item.getEndTime() + "\t" + item.getTicketCount() + "\r\n");
+            }
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 }
