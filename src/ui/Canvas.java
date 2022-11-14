@@ -10,7 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import models.*;
 
-
+//просто канвас яким приймає станцію і малює всю інформаціює з неї
+//
 public class Canvas extends JPanel{
 
     BufferedImage surface;
@@ -19,7 +20,8 @@ public class Canvas extends JPanel{
     Graphics g;
 
     Image cashImg; //50 x 50
-    Image clientImg;//50 x 25
+    Image clientImg;
+    Image disabledImg;//50 x 25
 
     Station station;
     public Canvas(Station station) {
@@ -28,6 +30,7 @@ public class Canvas extends JPanel{
         try{
             cashImg = ImageIO.read(new File("src/sprites/cashier.png"));
             clientImg = ImageIO.read(new File("src/sprites/client.png"));
+            disabledImg = ImageIO.read(new File("src/sprites/clientDisabled.png"));
         }catch (IOException e) {
             System.out.println("Cash and client img set failed");
             throw new RuntimeException(e);
@@ -45,7 +48,6 @@ public class Canvas extends JPanel{
 
         }
 
-
         frame.add(this);
         frame.setSize(width,height);
         frame.setResizable(false);
@@ -53,7 +55,9 @@ public class Canvas extends JPanel{
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        Timer timer = new Timer(100, new ActionListener() {
+        //таймер джавах.свінг, читати про то в класі програм над вкладеним класом ClientCreateTimerTask
+        //обновлює вюшку кожні 50мс, в кого лагає комп може поставити побільше
+        Timer timer = new Timer(50, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
@@ -64,14 +68,18 @@ public class Canvas extends JPanel{
         timer.start();
 
     }
+
+    //перемальовує всю модель з нуля на початку запуску і коли викликаний метод репеінт
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
 
+        //малює станції
         for (var office:  station.getCashOffices()) {
             g.drawImage(cashImg, office.getPosition().x, office.getPosition().y, null);
         }
 
+        //малює входи
         for (int i = 0; i < station.getEntranceCount(); i++){
             Position tempPos = station.getEntrancePosition(i);
             g.setColor(Color.DARK_GRAY);
@@ -79,8 +87,14 @@ public class Canvas extends JPanel{
             //g.drawRect(tempPos.x, tempPos.y, 50, 20);
         }
 
+        //малює людей
         for (var client:  station.getClients()) {
-            g.drawImage(clientImg, client.getPosition().x, client.getPosition().y, null);
+            if(client.isDisabled()){
+                g.drawImage(disabledImg, client.getPosition().x, client.getPosition().y, null);
+            }else{
+                g.drawImage(clientImg, client.getPosition().x, client.getPosition().y, null);
+            }
+
         }
 
     }

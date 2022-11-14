@@ -11,6 +11,9 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+//маленьке вікно для того шоб зібрати інформацію про координати каси і відправити назад в стартФорм
+//викликається з стартФорм
+//при закритті просто відміняється добавлення каси
 public class CashInput {
     JFrame frame;
     private JSpinner spinnerX;

@@ -1,20 +1,19 @@
 package models;
 
-import javax.swing.*;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+
+//станція яка має список всіх кас, всіх клієнтів, позиції входів і ше якісь параметри незначні
+//внизу розпишу по методах конкретно
 public class Station {
     private List<CashOffice> offices;
     private List<Position> entrances;
     private List<Client> clients;
     private int timePerTicket; // in ms
     private int maxClients = 10;
-
-    Timer timer;
 
 
     public Station(){
@@ -26,16 +25,22 @@ public class Station {
     }
 
 
+    //починає процес продавання квитків який контролюється таймером
+    //викликається з класу Program при початку емуляції програми
+    //викликає initialiseTimer();
     public void startSellingTickets(){
         System.out.println("Starting selling tickets, time: " + timePerTicket);
         initialiseTimer();
-        timer.start();
+
     }
 
+    //починає таймер який раз в певний проміжок часу продає квиток(на кожній касі)
+    //видаляє клієнта зі станці якому вже продано квиток
     private void initialiseTimer(){
-        timer = new Timer(timePerTicket, new ActionListener() {
+        Timer timer2 = new Timer();
+        timer2.schedule(new TimerTask() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void run() {
                 for (CashOffice office : offices) {
                     if(!office.isDisabled()){
                         Client client = office.sellTicket();
@@ -46,8 +51,22 @@ public class Station {
                     }
                 }
             }
-        });
+        }, 0, timePerTicket);
+
     }
+
+    //задаю кількість входів а метод сам рахує їхнє місцеположення тіпа як justify-content: space-around;
+    public void setEntranceCount(int count){
+        if(entrances.size() != count) {
+            entrances.clear();
+            int space = 800/(count+1);
+            for (int i = 1; i <= count; i++){
+                entrances.add(new Position(space*i-25, 591));
+            }
+        }
+    }
+
+    //Далі нема шо читати
 
     public int getCashOfficeIndex(CashOffice cashOffice){
         return offices.indexOf(cashOffice);
@@ -60,15 +79,7 @@ public class Station {
         return Collections.unmodifiableList(clients);
     }
 
-    public void setEntranceCount(int count){
-        if(entrances.size() != count) {
-            entrances.clear();
-            int space = 800/(count+1);
-            for (int i = 1; i <= count; i++){
-                entrances.add(new Position(space*i-25, 591));
-            }
-        }
-    }
+
     public Position getEntrancePosition(int index){
         return entrances.get(index);
     }
@@ -87,7 +98,6 @@ public class Station {
     public List<CashOffice> getCashOffices(){
         return Collections.unmodifiableList(offices);
     }
-
 
     public void setTimePerTicket(int timePerTicket) {
         this.timePerTicket = timePerTicket;

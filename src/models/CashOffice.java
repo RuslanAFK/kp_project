@@ -7,6 +7,9 @@ import java.awt.event.ActionListener;
 import java.util.Deque;
 import java.util.LinkedList;
 
+//каса має інформацію про позицію, чи вона робоча і список клієнтів в черзі
+//всякі гетери сетери то ясно, найголовніше то public Client sellTicket() який продає квиток першому клієнту в черзі
+//викликається селТікет з станції і повертає їй клієнта шоб та станція видалила його зі свого списку(калхоз)
 public class CashOffice {
     private Position position;
     private boolean disabled;
@@ -25,13 +28,15 @@ public class CashOffice {
 
     public Client sellTicket(){
         if(queue.size() >= 1) {
-            return queue.remove();
+            Client tempClient = queue.remove();
+            calculateClientPos();
+            return tempClient;
         }
         return null;
     }
 
     //super kalhoz treba pererobyty des` v program
-    private void calculateClientPos(){
+    public void calculateClientPos(){
         int sizeBefore = 0;
         for (Client client : queue) {
             Position newPos = new Position(position.x, position.y);
@@ -56,10 +61,10 @@ public class CashOffice {
 
     public void addClient(Client client){
 
-        if(!client.isDisabled()){
+        if(client.isDisabled()){
             queue.addFirst(client);
         }else{
-            queue.add(client);
+            queue.addLast(client);
         }
         calculateClientPos();
     }

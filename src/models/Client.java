@@ -2,6 +2,7 @@ package models;
 
 import java.util.Optional;
 
+//тупо клієнт шо казати
 public class Client {
     private Status status = Status.NONE;
     private int ticketCount;
