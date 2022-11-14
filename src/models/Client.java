@@ -15,7 +15,18 @@ public class Client {
 
     }
 
+    public boolean isDisabled(){
+        if(status == Status.NONE){
+            return false;
+        }
+        return true;
+    }
+
     public Position getPosition() {
         return position;
+    }
+    public void setPosition(Position position){
+        this.position.x = position.x;
+        this.position.y = position.y;
     }
 }

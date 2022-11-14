@@ -102,7 +102,7 @@ public class StartForm {
         entranceSpinner.setMinimumSize(new Dimension(100, 25));
         ticketSpinner = new JSpinner(new SpinnerNumberModel(1000, 100, 5000, 1));
         ticketSpinner.setMinimumSize(new Dimension(100, 25));
-        strategySpinner = new JSpinner(new SpinnerNumberModel(1000, 1000, 5000, 1));
+        strategySpinner = new JSpinner(new SpinnerNumberModel(1000, 100, 5000, 1));
         strategySpinner.setMinimumSize(new Dimension(100, 25));
     }
 }

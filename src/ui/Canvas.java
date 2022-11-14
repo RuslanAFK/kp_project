@@ -11,76 +11,79 @@ import java.io.IOException;
 import models.*;
 
 
-public class Canvas {
+public class Canvas extends JPanel{
 
     BufferedImage surface;
     final int width = 800;
-    final int height = 600;
+    final int height = 640;//window nav is 40px
     Graphics g;
-    JLabel view;
-    Image cash; //50 x 50
-    Image client;//50 x 25
 
-    public Canvas() throws IOException {
+    Image cashImg; //50 x 50
+    Image clientImg;//50 x 25
+
+    Station station;
+    public Canvas(Station station) {
+        this.station = station;
         System.out.println("Const");
-        cash = ImageIO.read(new File("src/sprites/cashier.png"));
-        client = ImageIO.read(new File("src/sprites/client.png"));
-        surface = new BufferedImage(width,height, BufferedImage.TYPE_INT_RGB);
-        view = new JLabel(new ImageIcon(surface));
-        Graphics g = surface.getGraphics();
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, height);
-        g.dispose();
+        try{
+            cashImg = ImageIO.read(new File("src/sprites/cashier.png"));
+            clientImg = ImageIO.read(new File("src/sprites/client.png"));
+        }catch (IOException e) {
+            System.out.println("Cash and client img set failed");
+            throw new RuntimeException(e);
+        }
     }
 
-    public void start() throws InterruptedException {
+    public void start() {
         System.out.println("Start");
         JFrame frame = new JFrame("Cash Emulator");
-        Image icon = Toolkit.getDefaultToolkit().getImage("src/sprites/icon.png");
-        frame.setIconImage(icon);
+        try{
+            Image icon = Toolkit.getDefaultToolkit().getImage("src/sprites/icon.png");
+            frame.setIconImage(icon);
+        }catch (Exception e) {
+            System.out.println("Icon set failed");
+
+        }
 
 
-        frame.add(this.view);
+        frame.add(this);
         frame.setSize(width,height);
         frame.setResizable(false);
         frame.setVisible(true);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
-        drawCashier(new Position(20, 40));
-        drawClient(new Position(100, 150));
-
-        Timer timer = new Timer(1000, new ActionListener() {
+        Timer timer = new Timer(100, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println(width);
-                drawCashier(new Position(200, 200));
+
+                repaint(0,0,width,height);
             }
         });
-        timer.setRepeats(false);
+        timer.setRepeats(true);
         timer.start();
 
-        //Thread.sleep(2000);
-        //deleteClient();
-        //timer.stop();
+    }
+    @Override
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+
+        for (var office:  station.getCashOffices()) {
+            g.drawImage(cashImg, office.getPosition().x, office.getPosition().y, null);
+        }
+
+        for (int i = 0; i < station.getEntranceCount(); i++){
+            Position tempPos = station.getEntrancePosition(i);
+            g.setColor(Color.DARK_GRAY);
+            g.fillRect(tempPos.x, tempPos.y, 50, 10);
+            //g.drawRect(tempPos.x, tempPos.y, 50, 20);
+        }
+
+        for (var client:  station.getClients()) {
+            g.drawImage(clientImg, client.getPosition().x, client.getPosition().y, null);
+        }
 
     }
 
-    public void drawCashier(Position pos){
-        g = surface.getGraphics();
-        g.drawImage(cash, pos.x, pos.y, null);
-        g.dispose();
-    }
-    public void drawClient(Position pos){
-        g = surface.getGraphics();
-        g.drawImage(client, pos.x, pos.y, null);
-
-        g.dispose();
-    }
-    public void deleteClient(){
-        g = surface.getGraphics();
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, height);
-        g.dispose();
-    }
 
 }
