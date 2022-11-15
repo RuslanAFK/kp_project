@@ -24,8 +24,6 @@ public class Program {
     private int strategy;
     private Station station;
     private Canvas canvas;
-    private int maxClients = 10;
-    private boolean blockStation = false;
 
     private Program(){
         strategy = 1000;
@@ -94,14 +92,14 @@ public class Program {
     //отримує інформацію про клієнта і затримку за яку він має дойти до каси = час створення наступного клієнта(калхоз)
     public void addClientToStation(Client client, int delay){
 
-        if(station.getClients().size() == maxClients) {
-            blockStation = true;
+        if(station.getClients().size() == station.getMaxClients()) {
+            station.setBlocked(true);
             return;
         }
-        else if(blockStation && station.getClients().size() > 0.7*maxClients) {
+        else if(station.isBlocked() && station.getClients().size() > 0.7*station.getMaxClients()) {
             return;
         }
-        blockStation = false;
+        station.setBlocked(false);
 
         final Random random = new Random();
         //вибирає вхід на якому спавниться юзер, і зразу записує його позицію(тоже калхоз)

@@ -10,6 +10,8 @@ import java.util.*;
 //станція яка має список всіх кас, всіх клієнтів, позиції входів і ше якісь параметри незначні
 //внизу розпишу по методах конкретно
 public class Station {
+    private int maxClients = 10;
+    private boolean isBlocked = false;
     private List<CashOffice> offices;
     private List<Position> entrances;
     private List<Client> clients;
@@ -23,6 +25,17 @@ public class Station {
         loggingTable = new ArrayList<>();
     }
 
+    public int getMaxClients() {
+        return maxClients;
+    }
+    public boolean isBlocked() {
+        return isBlocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        isBlocked = blocked;
+    }
+
     public List<LoggingItem> getLoggingTable() {
         return loggingTable;
     }
@@ -34,6 +47,7 @@ public class Station {
         System.out.println("Starting selling tickets, time: " + timePerTicket);
         initialiseTimer();
     }
+
 
     public int generateTicketCount(int min, int max) {
         return (int) ((Math.random() * (max - min)) + min);
