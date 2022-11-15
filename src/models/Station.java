@@ -42,7 +42,7 @@ public class Station {
     //починає таймер який раз в певний проміжок часу продає квиток(на кожній касі)
     //видаляє клієнта зі станці якому вже продано квиток
     private void initialiseTimer(){
-        int ticketCount = generateTicketCount(1, 5);
+        //int ticketCount = generateTicketCount(1, 5);
         Timer timer2 = new Timer();
         timer2.schedule(new TimerTask() {
             @Override
@@ -57,20 +57,18 @@ public class Station {
                             // create log in logging table
                             for(var item: loggingTable) {
                                 if(item.getClientId() == client.getUniqueId()) {
-                                    item.setTicketCount(ticketCount);
+                                    item.setTicketCount(1);
                                     item.setEndTime();
                                     logTable();
                                 }
                             }
                             // restart with different random ticket count
-                            timer2.cancel();
-                            initialiseTimer();
                             System.out.println("\nClient removed: " + client.getPosition().toString());
                         }
                     }
                 }
             }
-        }, 0, (long) timePerTicket * ticketCount);
+        }, 0, timePerTicket);
 
     }
 
@@ -131,7 +129,7 @@ public class Station {
             System.out.println("Successfully wrote to the file.");
         } catch (IOException e) {
             System.out.println("An error occurred.");
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 }
