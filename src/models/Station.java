@@ -40,50 +40,31 @@ public class Station {
         return loggingTable;
     }
 
-    //починає процес продавання квитків який контролюється таймером
-    //викликається з класу Program при початку емуляції програми
-    //викликає initialiseTimer();
-    public void startSellingTickets(){
-        System.out.println("Starting selling tickets, time: " + timePerTicket);
-        initialiseTimer();
-    }
 
+    public void updateForSelling(CashOffice office) {
+        if(!office.isDisabled()){
+            var client = office.sellTicket();
+            if(client != null) {
 
-    public int generateTicketCount(int min, int max) {
-        return (int) ((Math.random() * (max - min)) + min);
-    }
+                clients.remove(client);
 
-    //починає таймер який раз в певний проміжок часу продає квиток(на кожній касі)
-    //видаляє клієнта зі станці якому вже продано квиток
-    private void initialiseTimer(){
-        //int ticketCount = generateTicketCount(1, 5);
-        Timer timer2 = new Timer();
-        timer2.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                for (CashOffice office : offices) {
-                    if(!office.isDisabled()){
-                        Client client = office.sellTicket();
-
-                        if(client != null) {
-                            clients.remove(client);
-
-                            // create log in logging table
-                            for(var item: loggingTable) {
-                                if(item.getClientId() == client.getUniqueId()) {
-                                    item.setTicketCount(1);
-                                    item.setEndTime();
-                                    logTable();
-                                }
-                            }
-                            // restart with different random ticket count
-                            System.out.println("\nClient removed: " + client.getPosition().toString());
+                // create log in logging table
+                try {
+                    for(var item: loggingTable) {
+                        if(item.getClientId() == client.getUniqueId()) {
+                            item.setTicketCount(client.getTicketCount());
+                            item.setEndTime();
+                            logTable();
                         }
                     }
+                } catch (Exception ex) {
+                    System.err.println("Can't modify now");
                 }
-            }
-        }, 0, timePerTicket);
 
+                // restart with different random ticket count
+                System.out.println("\nClient removed: " + client.getPosition().toString());
+            }
+        }
     }
 
     //задаю кількість входів а метод сам рахує їхнє місцеположення тіпа як justify-content: space-around;
@@ -135,7 +116,8 @@ public class Station {
         try {
             FileWriter myWriter = new FileWriter("logging_table.txt", false);
             myWriter.write("Client Id\tCash Id\tStart Time\tEnd Time\tTicket Count\r\n");
-            for(var item: loggingTable) {
+            var tableSnapshot = new ArrayList<>(loggingTable);
+            for(var item: tableSnapshot) {
                 myWriter.write(item.getClientId() + "\t" + item.getOfficeId() + "\t" + item.getStartTime() +
                         "\t" + item.getEndTime() + "\t" + item.getTicketCount() + "\r\n");
             }

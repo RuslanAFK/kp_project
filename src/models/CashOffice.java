@@ -60,6 +60,9 @@ public class CashOffice {
     public int getQueueSize(){
         return queue.size();
     }
+    public Client getFirstClient() {
+        return queue.isEmpty() ? null : queue.getFirst();
+    }
 
     public void addClient(Client client){
         if(client.isDisabled()){

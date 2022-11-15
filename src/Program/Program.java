@@ -60,9 +60,6 @@ public class Program {
         //запускає функцію для генерування клієнтів
         createClients();
 
-        //запускає роботу станції, каси починають продавати квитки клієнтам які до них підходять
-        station.startSellingTickets();
-
         System.out.println("Start strategy");
         System.out.println("Strategy: " + strategy);
     }
@@ -127,7 +124,21 @@ public class Program {
 
     }
 
+    public int generateTicketCount(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
+    }
 
+
+    public void notifyForSelling(CashOffice office) {
+        var ticketCount = office.getFirstClient().getTicketCount();
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                station.updateForSelling(office);
+            }
+        }, (long) station.getTimePerTicket() * ticketCount);
+    }
 
     //добавляє клієнта в чергу до каси
     //коменти на англ писав раніше того впадлу перекладати, то складний алгоритм його і так ніхто не буде читати
@@ -152,9 +163,12 @@ public class Program {
             //set clients pos and put him to cashOffice queue
             client.setPosition(cashOffices.get(0).getPosition());
             int index = station.getCashOfficeIndex(cashOffices.get(0));
+            var office = station.getCashOffices().get(index);
+            office.addClient(client);
+            notifyForSelling(office);
+
             station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index));
             station.logTable();
-            station.getCashOffices().get(index).addClient(client);
         }else{
             //find list of distances
             List<Double> distanceToCash = new ArrayList<Double>();
@@ -170,9 +184,12 @@ public class Program {
             //set clients pos and put him to cashOffice queue
             client.setPosition(cashOffices.get(minIndex).getPosition());
             int index = station.getCashOfficeIndex(cashOffices.get(minIndex));
+            var office = station.getCashOffices().get(index);
+            office.addClient(client);
+            notifyForSelling(office);
+
             station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index));
             station.logTable();
-            station.getCashOffices().get(index).addClient(client);
         }
 
     }
@@ -218,7 +235,7 @@ public class Program {
 
             Status status = generateStatus();
             Random random = new Random();
-            Client newClient = new Client(i++, new Position(0,0), status);
+            Client newClient = new Client(i++, new Position(0,0), status, generateTicketCount(1,5));
             addClientToStation(newClient, delay);
 
             delay = random.nextInt(500, 2000);

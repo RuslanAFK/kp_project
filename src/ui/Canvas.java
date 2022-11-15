@@ -84,7 +84,6 @@ public class Canvas extends JPanel{
             Position tempPos = station.getEntrancePosition(i);
             g.setColor(Color.DARK_GRAY);
             g.fillRect(tempPos.x, tempPos.y, 50, 10);
-            //g.drawRect(tempPos.x, tempPos.y, 50, 20);
         }
 
         //малює людей
