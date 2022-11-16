@@ -90,7 +90,7 @@ public class CashOffice {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    station.updateForSelling(office);
+                    station.deleteFirstClient(office);
                     isFree = true;
                 }
             }, (long) station.getTimePerTicket() * ticketCount);

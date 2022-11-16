@@ -45,12 +45,12 @@ public class Station {
     //викликає initialiseTimer();
     public void startSellingTickets(){
         System.out.println("Starting selling tickets, time: " + timePerTicket);
-        initialiseTimer();
+        notifyForSelling();
     }
 
     //починає таймер який раз в певний проміжок часу продає квиток(на кожній касі)
     //видаляє клієнта зі станці якому вже продано квиток
-    private void initialiseTimer(){
+    private void notifyForSelling(){
         Timer timer2 = new Timer();
         var station = this;
         timer2.schedule(new TimerTask() {
@@ -66,9 +66,7 @@ public class Station {
 
     }
 
-
-
-    public void notifyForSelling(CashOffice office) {
+    public void deleteFirstClient(CashOffice office) {
         if(!office.isDisabled()){
             var client = office.sellTicket();
             if(client != null) {
