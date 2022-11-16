@@ -143,11 +143,20 @@ public class Program {
 
         if(client.isDisabled()) {
             //if client is disabled he chooses closest cashOffice
-            cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled()).toList();
+            cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && !c.getIsReserve()).toList();
+            // Хотів не робити умову в умові, а просто провіряти після умови чи треба залучати резерву касу і добавляти в cashOffices, але чогось воно кидало ексепшин
+            if(station.getCashOffices().size() == 1 ||  station.getTechnicCashOffice().size()>0){
+                System.out.println("Reserve CashOffice is unable");
+                cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && c.getIsReserve()).toList();
+            }
         }else{
             //else he looks first on people in queue before him
             int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled()).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
-            cashOffices = station.getCashOffices().stream().filter(c -> c.getQueueSize() == minQueue).toList();
+            cashOffices =  station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue) && !c.isDisabled() && !c.getIsReserve()).toList();
+            if(station.getCashOffices().size() == 1 ||  station.getTechnicCashOffice().size()>0){
+                System.out.println("Reserve CashOffice is unable");
+                cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue) && !c.isDisabled() && c.getIsReserve()).toList();
+            }
         }
 
 
@@ -183,6 +192,15 @@ public class Program {
             station.logTable();
         }
 
+    }
+
+    // Цей метод получає каси які не активні і переносить людей на резервну касу, його ще не тестив бо не робив перерву касам, але в теорії має працювати можливо з багами
+    public void addClientToQueueReserve(Client client){
+        CashOffice reserve = station.getCashOffices().get(0); // Позамовчуванню створюється першою резервна каса, але можна замутити якийсь алгорим який її шукає щоб дяконюк не доїбалась
+        var disabledOffice = station.getTechnicCashOffice();
+        if(disabledOffice.size()>=1){
+            disabledOffice.stream().forEach(off -> {off.getQueue().forEach(client1 -> reserve.addClient(client1)); off.clearQueue();});
+        }
     }
 
     //шукає довжину вектора, для пошуку дистанції до каси

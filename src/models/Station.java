@@ -6,6 +6,7 @@ import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 //станція яка має список всіх кас, всіх клієнтів, позиції входів і ше якісь параметри незначні
 //внизу розпишу по методах конкретно
@@ -135,6 +136,11 @@ public class Station {
     }
     public int getTimePerTicket(){
         return timePerTicket;
+    }
+
+    // повертає список касс на технічній перерві
+    public List<CashOffice> getTechnicCashOffice(){
+        return this.offices.stream().filter(off->off.isDisabled()).collect(Collectors.toList());
     }
     public void logTable() {
         try {
