@@ -58,7 +58,7 @@ public class Station {
             public void run() {
                 for (CashOffice office : offices) {
                     if(!office.isDisabled() && office.isFree()){
-                        office.notifyForSelling(station);
+                        office.updateForSelling(station);
                     }
                 }
             }
@@ -68,7 +68,7 @@ public class Station {
 
 
 
-    public void updateForSelling(CashOffice office) {
+    public void notifyForSelling(CashOffice office) {
         if(!office.isDisabled()){
             var client = office.sellTicket();
             if(client != null) {

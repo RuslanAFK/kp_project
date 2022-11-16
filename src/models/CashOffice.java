@@ -81,7 +81,7 @@ public class CashOffice {
     public String toString() {
         return "X: " + position.x + ", Y: " + position.y;
     }
-    public void notifyForSelling(Station station) {
+    public void updateForSelling(Station station) {
         if(!queue.isEmpty()) {
             isFree = false;
             var ticketCount = getFirstClient().getTicketCount();
