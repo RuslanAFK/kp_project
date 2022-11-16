@@ -60,6 +60,9 @@ public class Program {
         //запускає функцію для генерування клієнтів
         createClients();
 
+        //запускає роботу станції, каси починають продавати квитки клієнтам які до них підходять
+        station.startSellingTickets();
+
         System.out.println("Start strategy");
         System.out.println("Strategy: " + strategy);
     }
@@ -129,16 +132,6 @@ public class Program {
     }
 
 
-    public void notifyForSelling(CashOffice office) {
-        var ticketCount = office.getFirstClient().getTicketCount();
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                station.updateForSelling(office);
-            }
-        }, (long) station.getTimePerTicket() * ticketCount);
-    }
 
     //добавляє клієнта в чергу до каси
     //коменти на англ писав раніше того впадлу перекладати, то складний алгоритм його і так ніхто не буде читати
@@ -165,7 +158,6 @@ public class Program {
             int index = station.getCashOfficeIndex(cashOffices.get(0));
             var office = station.getCashOffices().get(index);
             office.addClient(client);
-            notifyForSelling(office);
 
             station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index));
             station.logTable();
@@ -186,7 +178,6 @@ public class Program {
             int index = station.getCashOfficeIndex(cashOffices.get(minIndex));
             var office = station.getCashOffices().get(index);
             office.addClient(client);
-            notifyForSelling(office);
 
             station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index));
             station.logTable();

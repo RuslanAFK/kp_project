@@ -1,33 +1,33 @@
 package models;
 
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 //каса має інформацію про позицію, чи вона робоча і список клієнтів в черзі
 //всякі гетери сетери то ясно, найголовніше то public Client sellTicket() який продає квиток першому клієнту в черзі
 //викликається селТікет з станції і повертає їй клієнта шоб та станція видалила його зі свого списку(калхоз)
 public class CashOffice {
     private Position position;
-    private boolean disabled;
+    private boolean isDisabled;
+    private boolean isFree = true;
     private Deque<Client>  queue;
-
-    public CashOffice(Position position, boolean disabled) {
+    public CashOffice(Position position, boolean isDisabled) {
         queue = new LinkedList<>();
-        this.disabled = disabled;
+        this.isDisabled = isDisabled;
         this.position = new Position(position.x, position.y);
     }
     public CashOffice(Position position) {
         queue = new LinkedList<>();
         this.position = new Position(position.x, position.y);
-        disabled = false;
+        isDisabled = false;
     }
 
+    public boolean isFree() {
+        return isFree;
+    }
     public Client sellTicket(){
         if(queue.size() >= 1) {
             Client tempClient = queue.remove();
@@ -54,7 +54,7 @@ public class CashOffice {
     }
 
     public boolean isDisabled() {
-        return disabled;
+        return isDisabled;
     }
 
     public int getQueueSize(){
@@ -81,4 +81,20 @@ public class CashOffice {
     public String toString() {
         return "X: " + position.x + ", Y: " + position.y;
     }
+    public void notifyForSelling(Station station) {
+        if(!queue.isEmpty()) {
+            isFree = false;
+            var ticketCount = getFirstClient().getTicketCount();
+            Timer timer = new Timer();
+            var office = this;
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    station.updateForSelling(office);
+                    isFree = true;
+                }
+            }, (long) station.getTimePerTicket() * ticketCount);
+        }
+    }
+
 }

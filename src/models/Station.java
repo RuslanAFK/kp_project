@@ -40,6 +40,33 @@ public class Station {
         return loggingTable;
     }
 
+    //починає процес продавання квитків який контролюється таймером
+    //викликається з класу Program при початку емуляції програми
+    //викликає initialiseTimer();
+    public void startSellingTickets(){
+        System.out.println("Starting selling tickets, time: " + timePerTicket);
+        initialiseTimer();
+    }
+
+    //починає таймер який раз в певний проміжок часу продає квиток(на кожній касі)
+    //видаляє клієнта зі станці якому вже продано квиток
+    private void initialiseTimer(){
+        Timer timer2 = new Timer();
+        var station = this;
+        timer2.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                for (CashOffice office : offices) {
+                    if(!office.isDisabled() && office.isFree()){
+                        office.notifyForSelling(station);
+                    }
+                }
+            }
+        }, 0, 50);
+
+    }
+
+
 
     public void updateForSelling(CashOffice office) {
         if(!office.isDisabled()){
