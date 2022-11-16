@@ -77,7 +77,6 @@ public class Station {
                 try {
                     for(var item: loggingTable) {
                         if(item.getClientId() == client.getUniqueId()) {
-                            item.setTicketCount(client.getTicketCount());
                             item.setEndTime();
                             logTable();
                         }

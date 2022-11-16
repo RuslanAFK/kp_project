@@ -159,7 +159,7 @@ public class Program {
             var office = station.getCashOffices().get(index);
             office.addClient(client);
 
-            station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index));
+            station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index, client.getTicketCount()));
             station.logTable();
         }else{
             //find list of distances
@@ -179,7 +179,7 @@ public class Program {
             var office = station.getCashOffices().get(index);
             office.addClient(client);
 
-            station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index));
+            station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index, client.getTicketCount()));
             station.logTable();
         }
 
