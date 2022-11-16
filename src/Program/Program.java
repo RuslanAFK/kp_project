@@ -142,19 +142,21 @@ public class Program {
         List<CashOffice> cashOffices;
 
         if(client.isDisabled()) {
+
             //if client is disabled he chooses closest cashOffice
             cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && !c.getIsReserve()).toList();
             // Хотів не робити умову в умові, а просто провіряти після умови чи треба залучати резерву касу і добавляти в cashOffices, але чогось воно кидало ексепшин
             if(station.getCashOffices().size() == 1 ||  station.getTechnicCashOffice().size()>0){
-                System.out.println("Reserve CashOffice is unable");
+                System.out.println("Reserve CashOffice is enable");
                 cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && c.getIsReserve()).toList();
             }
         }else{
+
             //else he looks first on people in queue before him
-            int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled()).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
+            int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled() && !c.getIsReserve() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
             cashOffices =  station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue) && !c.isDisabled() && !c.getIsReserve()).toList();
             if(station.getCashOffices().size() == 1 ||  station.getTechnicCashOffice().size()>0){
-                System.out.println("Reserve CashOffice is unable");
+                System.out.println("Reserve CashOffice is enable");
                 cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue) && !c.isDisabled() && c.getIsReserve()).toList();
             }
         }
@@ -176,6 +178,7 @@ public class Program {
             for (CashOffice pos : cashOffices) {
                 distanceToCash.add(findVectorDistance(client.getPosition(), pos.getPosition()));
             }
+
 
             //find index of min distance
             int minIndex = IntStream.range(0, distanceToCash.size()).boxed()
