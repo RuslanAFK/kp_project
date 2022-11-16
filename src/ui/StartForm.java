@@ -1,6 +1,7 @@
 package ui;
 
 import Program.Program;
+import models.CashOffice;
 import models.Station;
 
 import javax.swing.*;
@@ -29,7 +30,8 @@ public class StartForm {
     public StartForm(Station st) {
         this.station = st;
         strategy = 1000;
-
+        //Створюється резерва каса
+        station.addCashOffice(new CashOffice(true));
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

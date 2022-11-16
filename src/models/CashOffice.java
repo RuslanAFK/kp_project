@@ -14,6 +14,11 @@ public class CashOffice {
     private boolean isDisabled;
     private boolean isFree = true;
     private Deque<Client>  queue;
+    private boolean isReserve;
+
+    public boolean getIsReserve(){
+        return isReserve;
+    }
     public CashOffice(Position position, boolean isDisabled) {
         queue = new LinkedList<>();
         this.isDisabled = isDisabled;
@@ -23,6 +28,13 @@ public class CashOffice {
         queue = new LinkedList<>();
         this.position = new Position(position.x, position.y);
         isDisabled = false;
+    }
+
+    public CashOffice(boolean reserve) {
+        queue = new LinkedList<>();
+        this.position = new Position(0, 0);
+        isDisabled = false;
+        isReserve = reserve;
     }
 
     public boolean isFree() {
@@ -64,6 +76,8 @@ public class CashOffice {
         return queue.isEmpty() ? null : queue.getFirst();
     }
 
+    public void clearQueue(){ queue = new LinkedList<>();}
+    public Deque<Client> getQueue(){ return queue;};
     public void addClient(Client client){
         if(client.isDisabled()){
             queue.addFirst(client);
