@@ -68,7 +68,12 @@ public class CashOffice {
     public boolean isDisabled() {
         return isDisabled;
     }
-
+    public void makeDisabled(){
+        isDisabled = true;
+    }
+    public void makeEnabled(){
+        isDisabled = false;
+    }
     public int getQueueSize(){
         return queue.size();
     }
