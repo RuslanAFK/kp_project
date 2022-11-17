@@ -59,7 +59,7 @@ public class Program {
 
         //запускає функцію для генерування клієнтів
         createClients();
-
+        makeBreakCashOffice();
         //запускає роботу станції, каси починають продавати квитки клієнтам які до них підходять
         station.startSellingTickets();
 
@@ -86,6 +86,13 @@ public class Program {
         }
     }
 
+
+    //Функція яка робить касам  перерву
+    public void makeBreakCashOffice(){
+        Random random = new Random();
+        Timer timer = new Timer();
+        timer.schedule(new makeDisableCashOffice(timer),random.nextInt(15000, 20000));
+    }
 
     //добавляє клієнта на станцію
     //викликається після створення клієнта
@@ -154,10 +161,11 @@ public class Program {
 
             //else he looks first on people in queue before him
             int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled() && !c.getIsReserve() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
-            cashOffices =  station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue) && !c.isDisabled() && !c.getIsReserve()).toList();
+            cashOffices =  station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue)).toList();
             if(station.getCashOffices().size() == 1 ||  station.getTechnicCashOffice().size()>0){
                 System.out.println("Reserve CashOffice is enable");
-                cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue) && !c.isDisabled() && c.getIsReserve()).toList();
+                int minQueues = station.getCashOffices().stream().filter(c -> !c.isDisabled() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
+                cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueues) && !c.isDisabled() ).toList();
             }
         }
 
@@ -258,4 +266,41 @@ public class Program {
             }
         }
     }
+
+    private class makeDisableCashOffice extends TimerTask{
+
+        private final Timer timer;
+
+
+        makeDisableCashOffice(Timer timer) {
+            this.timer = timer;
+
+        }
+
+        @Override
+        public void run() {
+
+
+            CashOffice cashOfficeToDisable = station.getCashOffices().get(1);
+            if(!cashOfficeToDisable.isDisabled()){
+                System.out.println("Disable office number 1");
+                Random random = new Random();
+
+                cashOfficeToDisable.makeDisabled();
+                cashOfficeToDisable.getQueue().forEach(client -> addClientToQueueReserve(client));
+                cashOfficeToDisable.clearQueue();
+            }
+            else{
+                System.out.println("Enbale office number 1");
+                cashOfficeToDisable.makeEnabled();
+            }
+            Random random = new Random();
+
+
+
+            timer.schedule(new makeDisableCashOffice(timer), 15000);
+
+        }
+    }
+
 }
