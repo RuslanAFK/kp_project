@@ -258,19 +258,26 @@ public class Program {
         @Override
         public void run() {
 
+            Random random = new Random();
+            int index = random.nextInt(1,station.getCashOffices().size());
+            CashOffice cashOfficeToDisable = station.getCashOffices().get(index);
 
-            CashOffice cashOfficeToDisable = station.getCashOffices().get(1);
             if(!cashOfficeToDisable.isDisabled()){
-                System.out.println("Disable office number 1");
-                station.getReservedStation().makeEnabled();
+                System.out.println("Disable office number " + index);
+                station.getCashOffices().get(0).makeEnabled();
                 cashOfficeToDisable.makeDisabled();
                 cashOfficeToDisable.getQueue().forEach(Program.this::addClientToQueueReserve);
                 cashOfficeToDisable.clearQueue();
             }
             else {
-                System.out.println("Enbale office number 1");
-                station.getReservedStation().makeDisabled();
+                System.out.println("Enable office number "+ index);
                 cashOfficeToDisable.makeEnabled();
+                if(station.getTechnicCashOffice().size() == 0){
+                    station.getReservedStation().makeDisabled();
+                    station.getReservedStation().getQueue().forEach(cashOfficeToDisable::addClient);
+                    station.getReservedStation().clearQueue();
+                }
+
             }
             timer.schedule(new makeDisableCashOffice(timer), 15000);
         }
