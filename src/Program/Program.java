@@ -4,29 +4,22 @@ import models.*;
 import ui.Canvas;
 import ui.StartForm;
 
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static helpers.Helper.generateRandomStatus;
+import static helpers.Helper.randomIntInRange;
 import static java.util.Comparator.comparingDouble;
 
-//DEFINE Калхоз = Хєрово написано, тримається на доброму слові і тд
-
 //клас програм це сінглтон
-//тримає в собі інформацію про модельку станції і про вюшку канвас
-//також має поле стратегія який визначає час     за який генерується новий клієнт в мс, якшо -1 то рандом
+//тримає в собі інформацію про модельку станції і про канвас
+//також має поле стратегія який визначає час, за який генерується новий клієнт в мс, якшо -1 то рандом
 public class Program {
-
     private static Program _instance;
-    private int strategy;
-    private Station station;
-    private Canvas canvas;
+    private int strategy = 1000;
+    private final Station station;
 
     private Program(){
-        strategy = 1000;
         station = new Station();
     }
 
@@ -53,15 +46,16 @@ public class Program {
     //в канвас передаю станцію, він виводить всю інфу раз в якись термін часу
     //цей клас старт викликається з класу StartForm і передає класу старт інформацію про стратегію
     public void start(int strategy){
-        canvas = new Canvas(station);
+        Canvas canvas = new Canvas(station);
         canvas.start();
         this.strategy = strategy;
 
         //запускає функцію для генерування клієнтів
         createClients();
         makeBreakCashOffice();
+
         //запускає роботу станції, каси починають продавати квитки клієнтам які до них підходять
-        station.startSellingTickets();
+        station.notifyForSelling();
 
         System.out.println("Start strategy");
         System.out.println("Strategy: " + strategy);
@@ -70,7 +64,6 @@ public class Program {
 
     //функція для початку генерування клієнтів
     public void createClients(){
-        int i = 0;
         final Random random = new Random();
 
 
@@ -99,6 +92,7 @@ public class Program {
     //отримує інформацію про клієнта і затримку за яку він має дойти до каси = час створення наступного клієнта(калхоз)
     public void addClientToStation(Client client, int delay){
 
+        // checks if there are enough people in station
         if(station.getClients().size() == station.getMaxClients()) {
             station.setBlocked(true);
             return;
@@ -109,7 +103,7 @@ public class Program {
         station.setBlocked(false);
 
         final Random random = new Random();
-        //вибирає вхід на якому спавниться юзер, і зразу записує його позицію(тоже калхоз)
+        //вибирає вхід на якому спавниться юзер, і зразу записує його позицію
         int entrance = random.nextInt(station.getEntranceCount());
         Position startPos =
                 new Position(station.getEntrancePosition(entrance).x, station.getEntrancePosition(entrance).y);
@@ -133,12 +127,6 @@ public class Program {
         }, delay);
 
     }
-
-    public int generateTicketCount(int min, int max) {
-        return (int) ((Math.random() * (max - min)) + min);
-    }
-
-
 
     //добавляє клієнта в чергу до каси
     //коменти на англ писав раніше того впадлу перекладати, то складний алгоритм його і так ніхто не буде читати
@@ -212,12 +200,12 @@ public class Program {
 
 
 
-    // Цей метод получає каси які не активні і переносить людей на резервну касу, його ще не тестив бо не робив перерву касам, але в теорії має працювати можливо з багами
+    // Цей метод получає каси які не активні і переносить людей на резервну касу
     public void addClientToQueueReserve(Client client){
-        CashOffice reserve = station.getCashOffices().get(0); // Позамовчуванню створюється першою резервна каса, але можна замутити якийсь алгорим який її шукає щоб дяконюк не доїбалась
+        CashOffice reserve = station.getCashOffices().get(0);
         var disabledOffice = station.getTechnicCashOffice();
         if(disabledOffice.size()>=1){
-            disabledOffice.stream().forEach(off -> {off.getQueue().forEach(client1 -> reserve.addClient(client1)); off.clearQueue();});
+            disabledOffice.forEach(off -> {off.getQueue().forEach(reserve::addClient); off.clearQueue();});
         }
     }
 
@@ -231,7 +219,6 @@ public class Program {
     //таймер в окремому класі тому, що потрібно кожен раз змінювати затримку пере викликом на рандомну, і неможливо
     //реверсивно викликати декілька разів одину і ту саму задачу таймера
     private class ClientCreateTimerTask extends TimerTask{
-
         private final Timer timer;
         private final Random random;
         static private int i = 0;
@@ -241,28 +228,12 @@ public class Program {
             this.timer = timer;
             this.random = random;
         }
-        public Status generateStatus() {
-            Random random = new Random();
-            if(random.nextInt()%7==0){
-                return Status.DISABLED;
-            }
-            if(random.nextInt()%9==0){
-                return Status.WITH_CHILD;
-            }
-            if(random.nextInt()%11==0){
-                return Status.CHILD;
-            }
-            if(random.nextInt()%13==0){
-                return Status.STUDENT;
-            }
-            return Status.NONE;
-        }
+
         @Override
         public void run() {
-
-            Status status = generateStatus();
+            Status status = generateRandomStatus();
             Random random = new Random();
-            Client newClient = new Client(i++, new Position(0,0), status, generateTicketCount(1,5));
+            Client newClient = new Client(i++, new Position(0,0), status, randomIntInRange(1,5));
             addClientToStation(newClient, delay);
 
             delay = random.nextInt(500, 2000);
@@ -278,10 +249,8 @@ public class Program {
 
         private final Timer timer;
 
-
         makeDisableCashOffice(Timer timer) {
             this.timer = timer;
-
         }
 
         @Override
@@ -291,23 +260,16 @@ public class Program {
             CashOffice cashOfficeToDisable = station.getCashOffices().get(1);
             if(!cashOfficeToDisable.isDisabled()){
                 System.out.println("Disable office number 1");
-                Random random = new Random();
 
                 cashOfficeToDisable.makeDisabled();
-                cashOfficeToDisable.getQueue().forEach(client -> addClientToQueueReserve(client));
+                cashOfficeToDisable.getQueue().forEach(Program.this::addClientToQueueReserve);
                 cashOfficeToDisable.clearQueue();
             }
-            else{
+            else {
                 System.out.println("Enbale office number 1");
                 cashOfficeToDisable.makeEnabled();
             }
-            Random random = new Random();
-
-
-
             timer.schedule(new makeDisableCashOffice(timer), 15000);
-
         }
     }
-
 }

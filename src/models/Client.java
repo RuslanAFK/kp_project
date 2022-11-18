@@ -1,13 +1,10 @@
 package models;
 
-import java.util.Optional;
-
-//тупо клієнт шо казати
 public class Client {
-    private Status status;
-    private int uniqueId;
-    private Position position;
-    private int ticketCount;
+    private final Status status;
+    private final int uniqueId;
+    private final Position position;
+    private final int ticketCount;
     public Client(int uniqueId, Position position, Status status, int ticketCount) {
         this.uniqueId = uniqueId;
         this.position = new Position(position.x, position.y);
@@ -29,10 +26,6 @@ public class Client {
 
     public Position getPosition() {
         return position;
-    }
-
-    public Status getStatus() {
-        return status;
     }
 
     public void setPosition(Position position){

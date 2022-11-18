@@ -8,10 +8,10 @@ import java.util.TimerTask;
 
 //каса має інформацію про позицію, чи вона робоча і список клієнтів в черзі
 //всякі гетери сетери то ясно, найголовніше то public Client sellTicket() який продає квиток першому клієнту в черзі
-//викликається селТікет з станції і повертає їй клієнта шоб та станція видалила його зі свого списку(калхоз)
+//викликається селТікет з станції і повертає їй клієнта шоб та станція видалила його зі свого списку
 public class CashOffice {
-    private Position position;
-    private boolean isDisabled;
+    private final Position position;
+    private boolean isDisabled = false;
     private boolean isFree = true;
     private Deque<Client>  queue;
     private boolean isReserve;
@@ -19,15 +19,9 @@ public class CashOffice {
     public boolean getIsReserve(){
         return isReserve;
     }
-    public CashOffice(Position position, boolean isDisabled) {
-        queue = new LinkedList<>();
-        this.isDisabled = isDisabled;
-        this.position = new Position(position.x, position.y);
-    }
     public CashOffice(Position position) {
         queue = new LinkedList<>();
         this.position = new Position(position.x, position.y);
-        isDisabled = false;
     }
 
     public CashOffice(boolean reserve) {
@@ -43,14 +37,14 @@ public class CashOffice {
     public Client sellTicket(){
         if(queue.size() >= 1) {
             Client tempClient = queue.remove();
-            calculateClientPos();
+            updateQueuePositions();
             return tempClient;
         }
         return null;
     }
 
-    //super kalhoz treba pererobyty des` v program
-    public void calculateClientPos(){
+    // updates client positions in queue whenever client goes into or out of queue
+    public void updateQueuePositions(){
         int sizeBefore = 0;
         for (Client client : queue) {
             Position newPos = new Position(position.x, position.y);
@@ -62,7 +56,6 @@ public class CashOffice {
             client.setPosition(newPos);
             sizeBefore++;
         }
-
     }
 
     public boolean isDisabled() {
@@ -89,7 +82,7 @@ public class CashOffice {
         }else{
             queue.addLast(client);
         }
-        calculateClientPos();
+        updateQueuePositions();
     }
 
     public Position getPosition() {
