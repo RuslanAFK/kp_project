@@ -27,26 +27,23 @@ public class Canvas extends JPanel{
     Station station;
     public Canvas(Station station) {
         this.station = station;
-        System.out.println("Const");
         try{
             cashImg = ImageIO.read(new File("src/sprites/cashier.png"));
             disCashImg = ImageIO.read(new File("src/sprites/cashierDis.png"));
             clientImg = ImageIO.read(new File("src/sprites/client.png"));
             disabledImg = ImageIO.read(new File("src/sprites/clientDisabled.png"));
         }catch (IOException e) {
-            System.out.println("Cash and client img set failed");
-            throw new RuntimeException(e);
+            System.err.println("Cash and client img set failed");
         }
     }
 
     public void start() {
-        System.out.println("Start");
         JFrame frame = new JFrame("Cash Emulator");
         try{
             Image icon = Toolkit.getDefaultToolkit().getImage("src/sprites/icon.png");
             frame.setIconImage(icon);
         }catch (Exception e) {
-            System.out.println("Icon set failed");
+            System.err.println("Icon set failed");
 
         }
 

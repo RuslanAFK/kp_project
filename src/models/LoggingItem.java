@@ -15,7 +15,6 @@ public class LoggingItem {
         this.clientId = clientId;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
-        System.out.println(dtf.format(now));
         this.startTime = dtf.format(now);
         this.ticketCount = ticketCount;
     }
@@ -39,7 +38,6 @@ public class LoggingItem {
     public void setEndTime() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
-        System.out.println(dtf.format(now));
         this.endTime = dtf.format(now);
     }
 

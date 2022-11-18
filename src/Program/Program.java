@@ -56,9 +56,6 @@ public class Program {
 
         //запускає роботу станції, каси починають продавати квитки клієнтам які до них підходять
         station.notifyForSelling();
-
-        System.out.println("Start strategy");
-        System.out.println("Strategy: " + strategy);
     }
 
 
@@ -68,7 +65,6 @@ public class Program {
 
 
         Timer timer = new Timer();
-        System.out.println("Creating timer started: " + strategy);
 
         //викликаю таймер і даю йому задачу як окремий клас з перевизначеним методом run, якшо стратегія -1 тоді рандомні значення
         //більше про таймер написано над класом ClientCreateTimerTask
@@ -114,14 +110,12 @@ public class Program {
         //добавляє клієнта на станцію(але ше не в чергу)
         station.addClient(client);
 
-        System.out.println("ClientEntrance: " + entrance);
 
         //запускає таймер який через певну кількість часу добавляє клієнта в чергу до каси
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                System.out.println("Add client to queue");
                 addClientToQueue(client);
             }
         }, delay);
@@ -142,7 +136,6 @@ public class Program {
                 cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled()).toList();
                 // Хотів не робити умову в умові, а просто провіряти після умови чи треба залучати резерву касу і добавляти в cashOffices, але чогось воно кидало ексепшин
                 if (station.getCashOffices().size() == 1 ) {
-                    System.out.println("Reserve CashOffice is enable");
                     station.getCashOffices().get(0).makeEnabled();
                     cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && c.isReserved()).toList();
                 }
@@ -156,16 +149,9 @@ public class Program {
                 catch (NoSuchElementException ex){
 
                 }
-
-                /*if (station.getCashOffices().size() == 1 || station.getTechnicCashOffice().size() > 0) {
-                    System.out.println("Reserve CashOffice is enable");
-                    int minQueues = station.getCashOffices().stream().filter(c -> !c.isDisabled()).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
-                    cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueues)).toList();
-                }*/
             }
 
 
-            System.out.println("Start queue algorithm");
             if (cashOffices.size() == 1) {
                 //set clients pos and put him to cashOffice queue
                 client.setPosition(cashOffices.get(0).getPosition());
@@ -263,14 +249,12 @@ public class Program {
             CashOffice cashOfficeToDisable = station.getCashOffices().get(index);
 
             if(!cashOfficeToDisable.isDisabled()){
-                System.out.println("Disable office number " + index);
                 station.getCashOffices().get(0).makeEnabled();
                 cashOfficeToDisable.makeDisabled();
                 cashOfficeToDisable.getQueue().forEach(Program.this::addClientToQueueReserve);
                 cashOfficeToDisable.clearQueue();
             }
             else {
-                System.out.println("Enable office number "+ index);
                 cashOfficeToDisable.makeEnabled();
                 if(station.getTechnicCashOffice().size() == 0){
                     station.getReservedStation().makeDisabled();

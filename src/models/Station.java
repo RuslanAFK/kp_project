@@ -86,10 +86,9 @@ public class Station {
                         }
                     }
                 } catch (Exception ex) {
-                    System.err.println("Can't modify now");
+                    System.err.println("Can't modify now logging tree.");
                 }
 
-                System.out.println("\nClient removed: " + client.getPosition().toString());
             }
         }
     }
@@ -152,9 +151,8 @@ public class Station {
                         "\t" + item.getEndTime() + "\t" + item.getTicketCount() + "\r\n");
             }
             myWriter.close();
-            System.out.println("Successfully wrote to the file.");
         } catch (IOException e) {
-            System.out.println("An error occurred.");
+            System.err.println("Cannot write to file.");
         }
     }
 }
