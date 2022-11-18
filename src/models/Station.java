@@ -18,13 +18,25 @@ public class Station {
     private final List<LoggingItem> loggingTable;
     private int timePerTicket = 1000; // in ms
     public Station(){
+
         this.offices = new ArrayList<>();
         entrances = new ArrayList<>();
         entrances.add(new Position(400-25, 591));
         clients = new ArrayList<>();
         loggingTable = new ArrayList<>();
+        //Створюється резерва каса
+        addCashOffice(new CashOffice(true));
     }
 
+
+    public CashOffice getReservedStation(){
+        for (var office: offices) {
+            if (office.isReserved() == true){
+                return office;
+            }
+        }
+        return null;
+    }
     public int getMaxClients() {
         return 20;
     }

@@ -20,7 +20,8 @@ public class Canvas extends JPanel{
     Graphics g;
 
     Image cashImg; //50 x 50
-    Image clientImg;
+    Image disCashImg; //50 x 50
+    Image clientImg;//50 x 25
     Image disabledImg;//50 x 25
 
     Station station;
@@ -29,6 +30,7 @@ public class Canvas extends JPanel{
         System.out.println("Const");
         try{
             cashImg = ImageIO.read(new File("src/sprites/cashier.png"));
+            disCashImg = ImageIO.read(new File("src/sprites/cashierDis.png"));
             clientImg = ImageIO.read(new File("src/sprites/client.png"));
             disabledImg = ImageIO.read(new File("src/sprites/clientDisabled.png"));
         }catch (IOException e) {
@@ -76,7 +78,12 @@ public class Canvas extends JPanel{
 
         //малює станції
         for (var office:  station.getCashOffices()) {
-            g.drawImage(cashImg, office.getPosition().x, office.getPosition().y, null);
+            if(office.isDisabled()){
+                g.drawImage(disCashImg, office.getPosition().x, office.getPosition().y, null);
+            }else{
+                g.drawImage(cashImg, office.getPosition().x, office.getPosition().y, null);
+            }
+
         }
 
         //малює входи

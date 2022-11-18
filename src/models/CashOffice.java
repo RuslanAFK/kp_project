@@ -16,7 +16,7 @@ public class CashOffice {
     private Deque<Client>  queue;
     private boolean isReserve;
 
-    public boolean getIsReserve(){
+    public boolean isReserved(){
         return isReserve;
     }
     public CashOffice(Position position) {
@@ -27,7 +27,7 @@ public class CashOffice {
     public CashOffice(boolean reserve) {
         queue = new LinkedList<>();
         this.position = new Position(0, 0);
-        isDisabled = false;
+        isDisabled = true;
         isReserve = reserve;
     }
 

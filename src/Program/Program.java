@@ -131,66 +131,76 @@ public class Program {
     //добавляє клієнта в чергу до каси
     //коменти на англ писав раніше того впадлу перекладати, то складний алгоритм його і так ніхто не буде читати
     //по простому вибирає накращу касу для клієнта і поміщає його в чергу + змінює позицію
-    public void addClientToQueue(Client client){
+    public void addClientToQueue(Client client) {
 
-        //generate list of cashOffices with minimum clients
-        List<CashOffice> cashOffices;
+            //generate list of cashOffices with minimum clients
+            List<CashOffice> cashOffices = new ArrayList<CashOffice>();
 
-        if(client.isDisabled()) {
+            if (client.isDisabled()) {
 
-            //if client is disabled he chooses closest cashOffice
-            cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && !c.getIsReserve()).toList();
-            // Хотів не робити умову в умові, а просто провіряти після умови чи треба залучати резерву касу і добавляти в cashOffices, але чогось воно кидало ексепшин
-            if(station.getCashOffices().size() == 1 ||  station.getTechnicCashOffice().size()>0){
-                System.out.println("Reserve CashOffice is enable");
-                cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && c.getIsReserve()).toList();
+                //if client is disabled he chooses closest cashOffice
+                cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled()).toList();
+                // Хотів не робити умову в умові, а просто провіряти після умови чи треба залучати резерву касу і добавляти в cashOffices, але чогось воно кидало ексепшин
+                if (station.getCashOffices().size() == 1 ) {
+                    System.out.println("Reserve CashOffice is enable");
+                    station.getCashOffices().get(0).makeEnabled();
+                    cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && c.isReserved()).toList();
+                }
+            } else {
+
+                //else he looks first on people in queue before him && !c.isReserved()
+                try {
+                    int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
+                    cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue)).toList();
+                }
+                catch (NoSuchElementException ex){
+
+                }
+
+                /*if (station.getCashOffices().size() == 1 || station.getTechnicCashOffice().size() > 0) {
+                    System.out.println("Reserve CashOffice is enable");
+                    int minQueues = station.getCashOffices().stream().filter(c -> !c.isDisabled()).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
+                    cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueues)).toList();
+                }*/
             }
-        }else{
-            //else he looks first on people in queue before him
-            int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled() && !c.getIsReserve() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
-            cashOffices =  station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue)).toList();
-            if(station.getCashOffices().size() == 1 ||  station.getTechnicCashOffice().size()>0){
-                System.out.println("Reserve CashOffice is enable");
-                int minQueues = station.getCashOffices().stream().filter(c -> !c.isDisabled() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
-                cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueues) && !c.isDisabled() ).toList();
+
+
+            System.out.println("Start queue algorithm");
+            if (cashOffices.size() == 1) {
+                //set clients pos and put him to cashOffice queue
+                client.setPosition(cashOffices.get(0).getPosition());
+                int index = station.getCashOfficeIndex(cashOffices.get(0));
+                var office = station.getCashOffices().get(index);
+                office.addClient(client);
+
+                station.getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
+                station.logTable();
+            } else {
+                //find list of distances
+                List<Double> distanceToCash = new ArrayList<Double>();
+                for (CashOffice pos : cashOffices) {
+                    distanceToCash.add(findVectorDistance(client.getPosition(), pos.getPosition()));
+                }
+
+
+                //find index of min distance
+                int minIndex = IntStream.range(0, distanceToCash.size()).boxed()
+                        .min(comparingDouble(distanceToCash::get)).orElse(0);
+
+
+                //set clients pos and put him to cashOffice queue
+                client.setPosition(cashOffices.get(minIndex).getPosition());
+                int index = station.getCashOfficeIndex(cashOffices.get(minIndex));
+                var office = station.getCashOffices().get(index);
+                office.addClient(client);
+
+                station.getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
+                station.logTable();
             }
         }
 
 
-        System.out.println("Start queue algorithm");
-        if(cashOffices.size() == 1){
-            //set clients pos and put him to cashOffice queue
-            client.setPosition(cashOffices.get(0).getPosition());
-            int index = station.getCashOfficeIndex(cashOffices.get(0));
-            var office = station.getCashOffices().get(index);
-            office.addClient(client);
 
-            station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index, client.getTicketCount()));
-            station.logTable();
-        }else{
-            //find list of distances
-            List<Double> distanceToCash = new ArrayList<Double>();
-            for (CashOffice pos : cashOffices) {
-                distanceToCash.add(findVectorDistance(client.getPosition(), pos.getPosition()));
-            }
-
-
-            //find index of min distance
-            int minIndex = IntStream.range(0, distanceToCash.size()).boxed()
-                    .min(comparingDouble(distanceToCash::get))
-                    .get();
-
-            //set clients pos and put him to cashOffice queue
-            client.setPosition(cashOffices.get(minIndex).getPosition());
-            int index = station.getCashOfficeIndex(cashOffices.get(minIndex));
-            var office = station.getCashOffices().get(index);
-            office.addClient(client);
-
-            station.getLoggingTable().add(new LoggingItem(client.getUniqueId(),index, client.getTicketCount()));
-            station.logTable();
-        }
-
-    }
 
     // Цей метод получає каси які не активні і переносить людей на резервну касу
     public void addClientToQueueReserve(Client client){
@@ -252,13 +262,14 @@ public class Program {
             CashOffice cashOfficeToDisable = station.getCashOffices().get(1);
             if(!cashOfficeToDisable.isDisabled()){
                 System.out.println("Disable office number 1");
-
+                station.getReservedStation().makeEnabled();
                 cashOfficeToDisable.makeDisabled();
                 cashOfficeToDisable.getQueue().forEach(Program.this::addClientToQueueReserve);
                 cashOfficeToDisable.clearQueue();
             }
             else {
                 System.out.println("Enbale office number 1");
+                station.getReservedStation().makeDisabled();
                 cashOfficeToDisable.makeEnabled();
             }
             timer.schedule(new makeDisableCashOffice(timer), 15000);
