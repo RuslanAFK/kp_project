@@ -11,12 +11,11 @@ import java.util.stream.Collectors;
 //станція яка має список всіх кас, всіх клієнтів, позиції входів і ше якісь параметри незначні
 //внизу розпишу по методах конкретно
 public class Station {
-    private int maxClients = 10;
     private boolean isBlocked = false;
-    private List<CashOffice> offices;
-    private List<Position> entrances;
-    private List<Client> clients;
-    private List<LoggingItem> loggingTable;
+    private final List<CashOffice> offices;
+    private final List<Position> entrances;
+    private final List<Client> clients;
+    private final List<LoggingItem> loggingTable;
     private int timePerTicket = 1000; // in ms
     public Station(){
         this.offices = new ArrayList<>();
@@ -27,7 +26,7 @@ public class Station {
     }
 
     public int getMaxClients() {
-        return maxClients;
+        return 20;
     }
     public boolean isBlocked() {
         return isBlocked;
@@ -41,20 +40,11 @@ public class Station {
         return loggingTable;
     }
 
-    //починає процес продавання квитків який контролюється таймером
-    //викликається з класу Program при початку емуляції програми
-    //викликає initialiseTimer();
-    public void startSellingTickets(){
-        System.out.println("Starting selling tickets, time: " + timePerTicket);
-        notifyForSelling();
-    }
-
-    //починає таймер який раз в певний проміжок часу продає квиток(на кожній касі)
-    //видаляє клієнта зі станці якому вже продано квиток
-    private void notifyForSelling(){
-        Timer timer2 = new Timer();
+    // every 50 ms updates offices that they can start selling tickets
+    public void notifyForSelling(){
+        Timer timer = new Timer();
         var station = this;
-        timer2.schedule(new TimerTask() {
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 for (CashOffice office : offices) {
@@ -67,6 +57,7 @@ public class Station {
 
     }
 
+    // pops first client of the station and the queue
     public void deleteFirstClient(CashOffice office) {
         if(!office.isDisabled()){
             var client = office.sellTicket();
@@ -86,13 +77,12 @@ public class Station {
                     System.err.println("Can't modify now");
                 }
 
-                // restart with different random ticket count
                 System.out.println("\nClient removed: " + client.getPosition().toString());
             }
         }
     }
 
-    //задаю кількість входів а метод сам рахує їхнє місцеположення тіпа як justify-content: space-around;
+    //задаю кількість входів а метод сам рахує їхнє місцеположення;
     public void setEntranceCount(int count){
         if(entrances.size() != count) {
             entrances.clear();
@@ -102,9 +92,6 @@ public class Station {
             }
         }
     }
-
-    //Далі нема шо читати
-
     public int getCashOfficeIndex(CashOffice cashOffice){
         return offices.indexOf(cashOffice);
     }
@@ -140,8 +127,9 @@ public class Station {
 
     // повертає список касс на технічній перерві
     public List<CashOffice> getTechnicCashOffice(){
-        return this.offices.stream().filter(off->off.isDisabled()).collect(Collectors.toList());
+        return this.offices.stream().filter(CashOffice::isDisabled).collect(Collectors.toList());
     }
+    // prints logging table to the file
     public void logTable() {
         try {
             FileWriter myWriter = new FileWriter("logging_table.txt", false);
@@ -155,7 +143,6 @@ public class Station {
             System.out.println("Successfully wrote to the file.");
         } catch (IOException e) {
             System.out.println("An error occurred.");
-            //e.printStackTrace();
         }
     }
 }

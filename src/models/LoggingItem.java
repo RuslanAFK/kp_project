@@ -5,11 +5,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class LoggingItem {
-    private int clientId;
-    private int cashOfficeId;
-    private String startTime;
+    private final int clientId;
+    private final int cashOfficeId;
+    private final String startTime;
     private String endTime = "not yet";
-    private int ticketCount;
+    private final int ticketCount;
     public LoggingItem(int clientId, int cashOfficeId, int ticketCount) {
         this.cashOfficeId = cashOfficeId;
         this.clientId = clientId;
