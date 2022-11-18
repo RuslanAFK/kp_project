@@ -146,7 +146,6 @@ public class Program {
                 cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && c.getIsReserve()).toList();
             }
         }else{
-
             //else he looks first on people in queue before him
             int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled() && !c.getIsReserve() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
             cashOffices =  station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue)).toList();
