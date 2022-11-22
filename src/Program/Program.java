@@ -116,91 +116,12 @@ public class Program {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                addClientToQueue(client);
+                station.addClientToQueue(client);
             }
         }, delay);
 
     }
 
-    //добавляє клієнта в чергу до каси
-    //коменти на англ писав раніше того впадлу перекладати, то складний алгоритм його і так ніхто не буде читати
-    //по простому вибирає накращу касу для клієнта і поміщає його в чергу + змінює позицію
-    public void addClientToQueue(Client client) {
-
-            //generate list of cashOffices with minimum clients
-            List<CashOffice> cashOffices = new ArrayList<CashOffice>();
-
-            if (client.isDisabled()) {
-
-                //if client is disabled he chooses closest cashOffice
-                cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled()).toList();
-                // Хотів не робити умову в умові, а просто провіряти після умови чи треба залучати резерву касу і добавляти в cashOffices, але чогось воно кидало ексепшин
-                if (station.getCashOffices().size() == 1 ) {
-                    station.getCashOffices().get(0).makeEnabled();
-                    cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && c.isReserved()).toList();
-                }
-            } else {
-
-                //else he looks first on people in queue before him && !c.isReserved()
-                try {
-                    int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
-                    cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue)).toList();
-                }
-                catch (NoSuchElementException ex){
-
-                }
-            }
-
-
-            if (cashOffices.size() == 1) {
-                //set clients pos and put him to cashOffice queue
-                client.setPosition(cashOffices.get(0).getPosition());
-                int index = station.getCashOfficeIndex(cashOffices.get(0));
-                var office = station.getCashOffices().get(index);
-                office.addClient(client);
-
-                station.getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
-                station.logTable();
-            } else {
-                //find list of distances
-                List<Double> distanceToCash = new ArrayList<Double>();
-                for (CashOffice pos : cashOffices) {
-                    distanceToCash.add(findVectorDistance(client.getPosition(), pos.getPosition()));
-                }
-
-
-                //find index of min distance
-                int minIndex = IntStream.range(0, distanceToCash.size()).boxed()
-                        .min(comparingDouble(distanceToCash::get)).orElse(0);
-
-
-                //set clients pos and put him to cashOffice queue
-                client.setPosition(cashOffices.get(minIndex).getPosition());
-                int index = station.getCashOfficeIndex(cashOffices.get(minIndex));
-                var office = station.getCashOffices().get(index);
-                office.addClient(client);
-
-                station.getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
-                station.logTable();
-            }
-        }
-
-
-
-
-    // Цей метод получає каси які не активні і переносить людей на резервну касу
-    public void addClientToQueueReserve(Client client){
-        CashOffice reserve = station.getCashOffices().get(0);
-        var disabledOffice = station.getTechnicCashOffice();
-        if(disabledOffice.size()>=1){
-            disabledOffice.forEach(off -> {off.getQueue().forEach(reserve::addClient); off.clearQueue();});
-        }
-    }
-
-    //шукає довжину вектора, для пошуку дистанції до каси
-    private double findVectorDistance(Position start, Position end){
-        return Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
-    }
 
     //Є два таймера таймер в java.util i javax.swing. Перший створює свій потік  і через то в ньому неможна міняти вюшку
     //тому в ui я юзаю таймер зі javax.swing який не створює інший потік а для алгоритмів юзаю java.util
@@ -251,7 +172,7 @@ public class Program {
             if(!cashOfficeToDisable.isDisabled()){
                 station.getCashOffices().get(0).makeEnabled();
                 cashOfficeToDisable.makeDisabled();
-                cashOfficeToDisable.getQueue().forEach(Program.this::addClientToQueueReserve);
+                cashOfficeToDisable.getQueue().forEach(Program.this.station::addClientToQueueReserve);
                 cashOfficeToDisable.clearQueue();
             }
             else {

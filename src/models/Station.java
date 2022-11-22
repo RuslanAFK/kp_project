@@ -7,6 +7,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static helpers.Helper.findVectorDistance;
+import static java.util.Comparator.comparingDouble;
 
 //станція яка має список всіх кас, всіх клієнтів, позиції входів і ше якісь параметри незначні
 //внизу розпишу по методах конкретно
@@ -139,6 +143,78 @@ public class Station {
     // повертає список касс на технічній перерві
     public List<CashOffice> getTechnicCashOffice(){
         return this.offices.stream().filter(CashOffice::isDisabled).collect(Collectors.toList());
+    }
+    //добавляє клієнта в чергу до каси
+    //коменти на англ писав раніше того впадлу перекладати, то складний алгоритм його і так ніхто не буде читати
+    //по простому вибирає накращу касу для клієнта і поміщає його в чергу + змінює позицію
+    public void addClientToQueue(Client client) {
+
+        //generate list of cashOffices with minimum clients
+        List<CashOffice> cashOffices = new ArrayList<CashOffice>();
+
+        if (client.isDisabled()) {
+
+            //if client is disabled he chooses closest cashOffice
+            cashOffices = getCashOffices().stream().filter(c -> !c.isDisabled()).toList();
+            // Хотів не робити умову в умові, а просто провіряти після умови чи треба залучати резерву касу і добавляти в cashOffices, але чогось воно кидало ексепшин
+            if (getCashOffices().size() == 1 ) {
+                getCashOffices().get(0).makeEnabled();
+                cashOffices = getCashOffices().stream().filter(c -> !c.isDisabled() && c.isReserved()).toList();
+            }
+        } else {
+
+            //else he looks first on people in queue before him && !c.isReserved()
+            try {
+                int minQueue = getCashOffices().stream().filter(c -> !c.isDisabled() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
+                cashOffices = getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue)).toList();
+            }
+            catch (NoSuchElementException ex){
+
+            }
+        }
+
+
+        if (cashOffices.size() == 1) {
+            //set clients pos and put him to cashOffice queue
+            client.setPosition(cashOffices.get(0).getPosition());
+            int index = getCashOfficeIndex(cashOffices.get(0));
+            var office = getCashOffices().get(index);
+            office.addClient(client);
+
+            getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
+            logTable();
+        } else {
+            //find list of distances
+            List<Double> distanceToCash = new ArrayList<Double>();
+            for (CashOffice pos : cashOffices) {
+                distanceToCash.add(findVectorDistance(client.getPosition(), pos.getPosition()));
+            }
+
+
+            //find index of min distance
+            int minIndex = IntStream.range(0, distanceToCash.size()).boxed()
+                    .min(comparingDouble(distanceToCash::get)).orElse(0);
+
+
+            //set clients pos and put him to cashOffice queue
+            client.setPosition(cashOffices.get(minIndex).getPosition());
+            int index = getCashOfficeIndex(cashOffices.get(minIndex));
+            var office = getCashOffices().get(index);
+            office.addClient(client);
+
+            getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
+            logTable();
+        }
+    }
+
+
+    // Цей метод получає каси які не активні і переносить людей на резервну касу
+    public void addClientToQueueReserve(Client client){
+        CashOffice reserve = getCashOffices().get(0);
+        var disabledOffice = getTechnicCashOffice();
+        if(disabledOffice.size()>=1){
+            disabledOffice.forEach(off -> {off.getQueue().forEach(reserve::addClient); off.clearQueue();});
+        }
     }
     // prints logging table to the file
     public void logTable() {
