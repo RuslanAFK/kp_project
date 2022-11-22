@@ -249,12 +249,14 @@ public class Program {
             CashOffice cashOfficeToDisable = station.getCashOffices().get(index);
 
             if(!cashOfficeToDisable.isDisabled()){
+                System.out.println("Disable office number " + index);
                 station.getCashOffices().get(0).makeEnabled();
                 cashOfficeToDisable.makeDisabled();
                 cashOfficeToDisable.getQueue().forEach(Program.this::addClientToQueueReserve);
                 cashOfficeToDisable.clearQueue();
             }
             else {
+                System.out.println("Enable office number "+ index);
                 cashOfficeToDisable.makeEnabled();
                 if(station.getTechnicCashOffice().size() == 0){
                     station.getReservedStation().makeDisabled();
@@ -264,6 +266,5 @@ public class Program {
 
             }
             timer.schedule(new makeDisableCashOffice(timer), 15000);
-        }
     }
 }
