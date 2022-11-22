@@ -19,7 +19,7 @@ public class Program {
     private int strategy = 1000;
     private final Station station;
 
-    private Program(){
+    private Program() {
         station = new Station();
     }
 
@@ -37,7 +37,7 @@ public class Program {
     }
 
     // запускає меню для конфігурування вхідних даних, з якими працює програма і записує їх в станцію яка створюється в конструкторі Program
-    public void configure(){
+    public void configure() {
         StartForm startForm = new StartForm(station);
         startForm.start();
     }
@@ -45,7 +45,7 @@ public class Program {
     //починає роботу емулятора, запускає канвас
     //в канвас передаю станцію, він виводить всю інфу раз в якись термін часу
     //цей клас старт викликається з класу StartForm і передає класу старт інформацію про стратегію
-    public void start(int strategy){
+    public void start(int strategy) {
         Canvas canvas = new Canvas(station);
         canvas.start();
         this.strategy = strategy;
@@ -60,7 +60,7 @@ public class Program {
 
 
     //функція для початку генерування клієнтів
-    public void createClients(){
+    public void createClients() {
         final Random random = new Random();
 
 
@@ -68,32 +68,31 @@ public class Program {
 
         //викликаю таймер і даю йому задачу як окремий клас з перевизначеним методом run, якшо стратегія -1 тоді рандомні значення
         //більше про таймер написано над класом ClientCreateTimerTask
-        if(strategy < 0) {
+        if (strategy < 0) {
             timer.schedule(new ClientCreateTimerTask(timer, random), random.nextInt(500, 2000));
-        }else{
+        } else {
             timer.schedule(new ClientCreateTimerTask(timer, random), strategy);
         }
     }
 
 
     //Функція яка робить касам  перерву
-    public void makeBreakCashOffice(){
+    public void makeBreakCashOffice() {
         Random random = new Random();
         Timer timer = new Timer();
-        timer.schedule(new makeDisableCashOffice(timer),random.nextInt(15000, 20000));
+        timer.schedule(new makeDisableCashOffice(timer), random.nextInt(15000, 20000));
     }
 
     //добавляє клієнта на станцію
     //викликається після створення клієнта
     //отримує інформацію про клієнта і затримку за яку він має дойти до каси = час створення наступного клієнта(калхоз)
-    public void addClientToStation(Client client, int delay){
+    public void addClientToStation(Client client, int delay) {
 
         // checks if there are enough people in station
-        if(station.getClients().size() == station.getMaxClients()) {
+        if (station.getClients().size() == station.getMaxClients()) {
             station.setBlocked(true);
             return;
-        }
-        else if(station.isBlocked() && station.getClients().size() > 0.7*station.getMaxClients()) {
+        } else if (station.isBlocked() && station.getClients().size() > 0.7 * station.getMaxClients()) {
             return;
         }
         station.setBlocked(false);
@@ -127,78 +126,78 @@ public class Program {
     //по простому вибирає накращу касу для клієнта і поміщає його в чергу + змінює позицію
     public void addClientToQueue(Client client) {
 
-            //generate list of cashOffices with minimum clients
-            List<CashOffice> cashOffices = new ArrayList<CashOffice>();
+        //generate list of cashOffices with minimum clients
+        List<CashOffice> cashOffices = new ArrayList<CashOffice>();
 
-            if (client.isDisabled()) {
+        if (client.isDisabled()) {
 
-                //if client is disabled he chooses closest cashOffice
-                cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled()).toList();
-                // Хотів не робити умову в умові, а просто провіряти після умови чи треба залучати резерву касу і добавляти в cashOffices, але чогось воно кидало ексепшин
-                if (station.getCashOffices().size() == 1 ) {
-                    station.getCashOffices().get(0).makeEnabled();
-                    cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && c.isReserved()).toList();
-                }
-            } else {
-
-                //else he looks first on people in queue before him && !c.isReserved()
-                try {
-                    int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled() ).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
-                    cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue)).toList();
-                }
-                catch (NoSuchElementException ex){
-
-                }
+            //if client is disabled he chooses closest cashOffice
+            cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled()).toList();
+            // Хотів не робити умову в умові, а просто провіряти після умови чи треба залучати резерву касу і добавляти в cashOffices, але чогось воно кидало ексепшин
+            if (station.getCashOffices().size() == 1) {
+                station.getCashOffices().get(0).makeEnabled();
+                cashOffices = station.getCashOffices().stream().filter(c -> !c.isDisabled() && c.isReserved()).toList();
             }
+        } else {
 
+            //else he looks first on people in queue before him && !c.isReserved()
+            try {
+                int minQueue = station.getCashOffices().stream().filter(c -> !c.isDisabled()).mapToInt(CashOffice::getQueueSize).min().orElseThrow();
+                cashOffices = station.getCashOffices().stream().filter(c -> (c.getQueueSize() == minQueue)).toList();
+            } catch (NoSuchElementException ex) {
 
-            if (cashOffices.size() == 1) {
-                //set clients pos and put him to cashOffice queue
-                client.setPosition(cashOffices.get(0).getPosition());
-                int index = station.getCashOfficeIndex(cashOffices.get(0));
-                var office = station.getCashOffices().get(index);
-                office.addClient(client);
-
-                station.getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
-                station.logTable();
-            } else {
-                //find list of distances
-                List<Double> distanceToCash = new ArrayList<Double>();
-                for (CashOffice pos : cashOffices) {
-                    distanceToCash.add(findVectorDistance(client.getPosition(), pos.getPosition()));
-                }
-
-
-                //find index of min distance
-                int minIndex = IntStream.range(0, distanceToCash.size()).boxed()
-                        .min(comparingDouble(distanceToCash::get)).orElse(0);
-
-
-                //set clients pos and put him to cashOffice queue
-                client.setPosition(cashOffices.get(minIndex).getPosition());
-                int index = station.getCashOfficeIndex(cashOffices.get(minIndex));
-                var office = station.getCashOffices().get(index);
-                office.addClient(client);
-
-                station.getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
-                station.logTable();
             }
         }
 
 
+        if (cashOffices.size() == 1) {
+            //set clients pos and put him to cashOffice queue
+            client.setPosition(cashOffices.get(0).getPosition());
+            int index = station.getCashOfficeIndex(cashOffices.get(0));
+            var office = station.getCashOffices().get(index);
+            office.addClient(client);
+
+            station.getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
+            station.logTable();
+        } else {
+            //find list of distances
+            List<Double> distanceToCash = new ArrayList<Double>();
+            for (CashOffice pos : cashOffices) {
+                distanceToCash.add(findVectorDistance(client.getPosition(), pos.getPosition()));
+            }
+
+
+            //find index of min distance
+            int minIndex = IntStream.range(0, distanceToCash.size()).boxed()
+                    .min(comparingDouble(distanceToCash::get)).orElse(0);
+
+
+            //set clients pos and put him to cashOffice queue
+            client.setPosition(cashOffices.get(minIndex).getPosition());
+            int index = station.getCashOfficeIndex(cashOffices.get(minIndex));
+            var office = station.getCashOffices().get(index);
+            office.addClient(client);
+
+            station.getLoggingTable().add(new LoggingItem(client.getUniqueId(), index, client.getTicketCount()));
+            station.logTable();
+        }
+    }
 
 
     // Цей метод получає каси які не активні і переносить людей на резервну касу
-    public void addClientToQueueReserve(Client client){
+    public void addClientToQueueReserve(Client client) {
         CashOffice reserve = station.getCashOffices().get(0);
         var disabledOffice = station.getTechnicCashOffice();
-        if(disabledOffice.size()>=1){
-            disabledOffice.forEach(off -> {off.getQueue().forEach(reserve::addClient); off.clearQueue();});
+        if (disabledOffice.size() >= 1) {
+            disabledOffice.forEach(off -> {
+                off.getQueue().forEach(reserve::addClient);
+                off.clearQueue();
+            });
         }
     }
 
     //шукає довжину вектора, для пошуку дистанції до каси
-    private double findVectorDistance(Position start, Position end){
+    private double findVectorDistance(Position start, Position end) {
         return Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
     }
 
@@ -206,7 +205,7 @@ public class Program {
     //тому в ui я юзаю таймер зі javax.swing який не створює інший потік а для алгоритмів юзаю java.util
     //таймер в окремому класі тому, що потрібно кожен раз змінювати затримку пере викликом на рандомну, і неможливо
     //реверсивно викликати декілька разів одину і ту саму задачу таймера
-    private class ClientCreateTimerTask extends TimerTask{
+    private class ClientCreateTimerTask extends TimerTask {
         private final Timer timer;
         private final Random random;
         static private int i = 0;
@@ -221,19 +220,19 @@ public class Program {
         public void run() {
             Status status = generateRandomStatus();
             Random random = new Random();
-            Client newClient = new Client(i++, new Position(0,0), status, randomIntInRange(1,5));
+            Client newClient = new Client(i++, new Position(0, 0), status, randomIntInRange(1, 5));
             addClientToStation(newClient, delay);
 
             delay = random.nextInt(500, 2000);
-            if(strategy < 0) {
+            if (strategy < 0) {
                 timer.schedule(new ClientCreateTimerTask(timer, random), delay);
-            }else{
+            } else {
                 timer.schedule(new ClientCreateTimerTask(timer, random), strategy);
             }
         }
     }
 
-    private class makeDisableCashOffice extends TimerTask{
+    private class makeDisableCashOffice extends TimerTask {
 
         private final Timer timer;
 
@@ -245,18 +244,19 @@ public class Program {
         public void run() {
 
             Random random = new Random();
-            int index = random.nextInt(1,station.getCashOffices().size());
+            int index = random.nextInt(1, station.getCashOffices().size());
             CashOffice cashOfficeToDisable = station.getCashOffices().get(index);
 
-            if(!cashOfficeToDisable.isDisabled()){
+            if (!cashOfficeToDisable.isDisabled()) {
+                System.out.println("Disable office number " + index);
                 station.getCashOffices().get(0).makeEnabled();
                 cashOfficeToDisable.makeDisabled();
                 cashOfficeToDisable.getQueue().forEach(Program.this::addClientToQueueReserve);
                 cashOfficeToDisable.clearQueue();
-            }
-            else {
+            } else {
+                System.out.println("Enable office number " + index);
                 cashOfficeToDisable.makeEnabled();
-                if(station.getTechnicCashOffice().size() == 0){
+                if (station.getTechnicCashOffice().size() == 0) {
                     station.getReservedStation().makeDisabled();
                     station.getReservedStation().getQueue().forEach(cashOfficeToDisable::addClient);
                     station.getReservedStation().clearQueue();
